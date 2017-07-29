@@ -11,12 +11,12 @@ namespace glTF_2_0;
 /// gltf_detailedDescription: The datatype of components in the attribute.  All valid values correspond to WebGL enums.  The corresponding typed arrays are `Int8Array`, `Uint8Array`, `Int16Array`, `Uint16Array`, `Uint32Array`, and `Float32Array`, respectively.  5125 (UNSIGNED_INT) is only allowed when the accessor contains indices, i.e., the accessor is only referenced by `primitive.indices`.
 /// gltf_webgl: `vertexAttribPointer()` type parameter
 enum ComponentType: int { //TODO: promote to top
-		BYTE = 5120,
-		UNSIGNED_BYTE = 5121,
-		SHORT = 5122,
-		UNSIGNED_SHORT = 5123,
-		UNSIGNED_INT = 5125,
-		FLOAT = 5126,
+	BYTE = 5120,
+	UNSIGNED_BYTE = 5121,
+	SHORT = 5122,
+	UNSIGNED_SHORT = 5123,
+	UNSIGNED_INT = 5125,
+	FLOAT = 5126,
 }
 
 /// "description": "Specifies if the attribute is a scalar, vector, or matrix."
@@ -28,6 +28,7 @@ enum AccessorType: short { //string
 	MAT2,
 	MAT3,
 	MAT4,
+	__UNSET,
 }
 
 ///-- accessor.sparse.indices.schema.json
@@ -38,7 +39,7 @@ table AccessorSparseIndices {
 	/// "description": "The offset relative to the start of the bufferView in bytes. Must be aligned."
 	byeOffset: int  = 0; //uint
 
-	componentType: ComponentType = BYTE;
+	componentType: int = -1;	//ComponentType = UNSIGNED_BYTE;
 
 	///-- glTFProperty
 	/// Dictionary object with extension-specific objects.
@@ -109,7 +110,7 @@ table Accessor
 	/// "description": "The datatype of components in the attribute."
 	/// "gltf_detailedDescription": "The datatype of components in the attribute.  All valid values correspond to WebGL enums.  The corresponding typed arrays are `Int8Array`, `Uint8Array`, `Int16Array`, `Uint16Array`, `Uint32Array`, and `Float32Array`, respectively.  5125 (UNSIGNED_INT) is only allowed when the accessor contains indices, i.e., the accessor is only referenced by `primitive.indices`."
 	/// "gltf_webgl": "`vertexAttribPointer()` type parameter"
-	componentType: ComponentType = UNSIGNED_BYTE;
+	componentType: int = -1;	//ComponentType = UNSIGNED_BYTE;
 
 	/// "description": "Specifies whether integer data values should be normalized."
 	/// "gltf_detailedDescription": "Specifies whether integer data values should be normalized (`true`) to [0, 1] (for unsigned types) or [-1, 1] (for signed types), or converted directly (`false`) when they are accessed. This property is defined only for accessors that contain vertex attributes or animation output data."
@@ -121,7 +122,7 @@ table Accessor
 	count: int = 1; //uint 
 
 	/// "description": "Specifies if the attribute is a scalar, vector, or matrix."
-	type: AccessorType;
+	type: AccessorType = __UNSET;
 	
 	///  "description": "Maximum value of each component in this attribute."
 	/// "minItems": 1,
@@ -323,7 +324,7 @@ table Buffer {
 	uri: string;
 
 	/// "description": "The length of the buffer in bytes."
-	byteLength: int; //uint
+	byteLength: int = 0; //uint
 
 	///-- glTFChildOfRootProperty
 	/// The user-defined name of this object.
@@ -375,7 +376,7 @@ table BufferView {
             
 	/// "description": "The target that the GPU buffer should be bound to."
 	/// "gltf_webgl": "`bindBuffer()`"     
-    target: BufferViewTarget = ARRAY_BUFFER;
+    target: int = -1; // BufferViewTarget = ARRAY_BUFFER;
 
 	///-- glTFChildOfRootProperty
 	/// The user-defined name of this object.
