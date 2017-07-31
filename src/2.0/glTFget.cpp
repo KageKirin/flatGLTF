@@ -1,7 +1,7 @@
-#include "flatgltf/2.0/glTF_api.h"
 #include "flatgltf/2.0/glTF_generated.h"
-#include "flatgltf/common/glTF_utils.h"
-#include "glTF_internal_types.h"
+#include "flatgltf/2.0/glTFapi.hpp"
+
+#include "glTFinternal.hpp"
 
 #define KHUTILS_ASSERTION_INLINE
 
@@ -13,95 +13,27 @@
 
 namespace glTF_2_0
 {
-	using namespace glTF_common;
-
-	///-----------------------------------------------------------------------
-	/// bindata
-	///-----------------------------------------------------------------------
-
-	std::vector<uint8_t>& get_Bindata(glTF_Document* const doc, const char* name)
-	{
-		return doc->bindata[name];
-	}
-
-	size_t set_Bindata(const std::vector<uint8_t>& data, glTF_Document* const doc, const char* name)
-	{
-		doc->bindata[name].clear();
-		doc->bindata[name].reserve(data.size());
-		std::copy(data.begin(), data.end(), std::back_inserter(doc->bindata[name]));
-		return doc->bindata[name].size();
-	}
-
-	size_t add_Bindata(const std::vector<uint8_t>& data, glTF_Document* const doc, const char* name)
-	{
-		doc->bindata[name].reserve(doc->bindata[name].size() + data.size());
-		std::copy(data.begin(), data.end(), std::back_inserter(doc->bindata[name]));
-		return doc->bindata[name].size();
-	}
-
-
-	size_t add_BufferData(const uint8_t* const data, size_t length, glTF_Document* const doc, BufferT* const buf)
-	{
-		KHUTILS_ASSERT_PTR(data);
-		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(buf);
-
-		if (is_DataUri(buf->uri))
-		{
-			auto bufData = convert_UriToData(buf->uri);
-			std::copy_n(data, length, std::back_inserter(bufData));
-			buf->uri		= convert_DataToUri(bufData);
-			buf->byteLength = bufData.size();
-		}
-		else
-		{
-			auto& bufData = get_Bindata(doc, buf->uri.c_str());
-			std::copy_n(data, length, std::back_inserter(bufData));
-			buf->byteLength = bufData.size();
-		}
-		return buf->byteLength;
-	}
-
-
-	size_t set_BufferViewData(const uint8_t* const data, size_t length, glTF_Document* const doc, BufferViewT* const view)
-	{
-		KHUTILS_ASSERT_PTR(data);
-		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(view);
-		KHUTILS_ASSERT_LESSEREQ(view->byteLength, 0);
-
-		auto buf = get_Buffer(doc, view->buffer);
-		KHUTILS_ASSERT_PTR(buf);
-
-		view->byteOffset = buf->byteLength;
-		add_BufferData(data, length, doc, buf);
-
-		view->byteLength = length;
-		view->byteStride = 0;
-		view->target	 = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
-		return view->byteLength;
-	}
 
 
 	///-----------------------------------------------------------------------
 	/// simple get for unique elements
 	///-----------------------------------------------------------------------
 
-	AssetT* const get_Asset(const glTF_Document* const doc)
+	AssetT* const getAsset(const Document* const doc)
 	{
 		return (doc && doc->root) ? doc->root->asset.get() : nullptr;
 	}
 
-	SceneT* const get_Scene(const glTF_Document* const doc)
+	SceneT* const getScene(const Document* const doc)
 	{
-		return (doc && doc->root) ? get_Scene(doc, doc->root->scene) : nullptr;
+		return (doc && doc->root) ? getScene(doc, doc->root->scene) : nullptr;
 	}
 
 	///-----------------------------------------------------------------------
 	/// get-by-id
 	///-----------------------------------------------------------------------
 
-	AccessorT* const get_Accessor(const glTF_Document* const doc, glTFid_t id)
+	AccessorT* const getAccessor(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -113,7 +45,7 @@ namespace glTF_2_0
 
 	//---
 
-	AnimationT* const get_Animation(const glTF_Document* const doc, glTFid_t id)
+	AnimationT* const getAnimation(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -125,7 +57,7 @@ namespace glTF_2_0
 
 	//---
 
-	BufferT* const get_Buffer(const glTF_Document* const doc, glTFid_t id)
+	BufferT* const getBuffer(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -137,7 +69,7 @@ namespace glTF_2_0
 
 	//---
 
-	BufferViewT* const get_BufferView(const glTF_Document* const doc, glTFid_t id)
+	BufferViewT* const getBufferView(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -149,7 +81,7 @@ namespace glTF_2_0
 
 	//---
 
-	CameraT* const get_Camera(const glTF_Document* const doc, glTFid_t id)
+	CameraT* const getCamera(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -161,7 +93,7 @@ namespace glTF_2_0
 
 	//---
 
-	ImageT* const get_Image(const glTF_Document* const doc, glTFid_t id)
+	ImageT* const getImage(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -173,7 +105,7 @@ namespace glTF_2_0
 
 	//---
 
-	MaterialT* const get_Material(const glTF_Document* const doc, glTFid_t id)
+	MaterialT* const getMaterial(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -185,7 +117,7 @@ namespace glTF_2_0
 
 	//---
 
-	// MeshPrimitiveT *const get_MeshPrimitive(const glTF_Document* const doc, glTFid_t id)
+	// MeshPrimitiveT *const getMeshPrimitive(const Document* const doc, glTFid_t id)
 	//{
 	//	if (doc && doc->root)
 	//	{
@@ -197,7 +129,7 @@ namespace glTF_2_0
 
 	//---
 
-	MeshT* const get_Mesh(const glTF_Document* const doc, glTFid_t id)
+	MeshT* const getMesh(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -209,7 +141,7 @@ namespace glTF_2_0
 
 	//---
 
-	NodeT* const get_Node(const glTF_Document* const doc, glTFid_t id)
+	NodeT* const getNode(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -221,7 +153,7 @@ namespace glTF_2_0
 
 	//---
 
-	SceneT* const get_Scene(const glTF_Document* const doc, glTFid_t id)
+	SceneT* const getScene(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -233,7 +165,7 @@ namespace glTF_2_0
 
 	//---
 
-	SamplerT* const get_Sampler(const glTF_Document* const doc, glTFid_t id)
+	SamplerT* const getSampler(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -245,7 +177,7 @@ namespace glTF_2_0
 
 	//---
 
-	TextureT* const get_Texture(const glTF_Document* const doc, glTFid_t id)
+	TextureT* const getTexture(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -257,7 +189,7 @@ namespace glTF_2_0
 
 	//---
 
-	SkinT* const get_Skin(const glTF_Document* const doc, glTFid_t id)
+	SkinT* const getSkin(const Document* const doc, glTFid_t id)
 	{
 		if (doc && doc->root)
 		{
@@ -275,7 +207,7 @@ namespace glTF_2_0
 	/// note that names are optional and this might not work
 	///-----------------------------------------------------------------------
 
-	AccessorT* const get_Accessor(const glTF_Document* const doc, const char* name)
+	AccessorT* const getAccessor(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -292,7 +224,7 @@ namespace glTF_2_0
 
 	//---
 
-	AnimationT* const get_Animation(const glTF_Document* const doc, const char* name)
+	AnimationT* const getAnimation(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -309,7 +241,7 @@ namespace glTF_2_0
 
 	//---
 
-	BufferT* const get_Buffer(const glTF_Document* const doc, const char* name)
+	BufferT* const getBuffer(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -326,7 +258,7 @@ namespace glTF_2_0
 
 	//---
 
-	BufferViewT* const get_BufferView(const glTF_Document* const doc, const char* name)
+	BufferViewT* const getBufferView(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -343,7 +275,7 @@ namespace glTF_2_0
 
 	//---
 
-	CameraT* const get_Camera(const glTF_Document* const doc, const char* name)
+	CameraT* const getCamera(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -360,7 +292,7 @@ namespace glTF_2_0
 
 	//---
 
-	ImageT* const get_Image(const glTF_Document* const doc, const char* name)
+	ImageT* const getImage(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -377,7 +309,7 @@ namespace glTF_2_0
 
 	//---
 
-	MaterialT* const get_Material(const glTF_Document* const doc, const char* name)
+	MaterialT* const getMaterial(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -394,7 +326,7 @@ namespace glTF_2_0
 
 	//---
 
-	// MeshPrimitiveT *const get_MeshPrimitive(const glTF_Document* const doc, const char* name)
+	// MeshPrimitiveT *const getMeshPrimitive(const Document* const doc, const char* name)
 	//{
 	//	if (doc && doc->root)
 	//	{
@@ -411,7 +343,7 @@ namespace glTF_2_0
 
 	//---
 
-	MeshT* const get_Mesh(const glTF_Document* const doc, const char* name)
+	MeshT* const getMesh(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -428,7 +360,7 @@ namespace glTF_2_0
 
 	//---
 
-	NodeT* const get_Node(const glTF_Document* const doc, const char* name)
+	NodeT* const getNode(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -445,7 +377,7 @@ namespace glTF_2_0
 
 	//---
 
-	SceneT* const get_Scene(const glTF_Document* const doc, const char* name)
+	SceneT* const getScene(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -462,7 +394,7 @@ namespace glTF_2_0
 
 	//---
 
-	SamplerT* const get_Sampler(const glTF_Document* const doc, const char* name)
+	SamplerT* const getSampler(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -479,7 +411,7 @@ namespace glTF_2_0
 
 	//---
 
-	TextureT* const get_Texture(const glTF_Document* const doc, const char* name)
+	TextureT* const getTexture(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -496,7 +428,7 @@ namespace glTF_2_0
 
 	//---
 
-	SkinT* const get_Skin(const glTF_Document* const doc, const char* name)
+	SkinT* const getSkin(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
 		{
@@ -517,7 +449,7 @@ namespace glTF_2_0
 	/// set-transform for nodes
 	///-----------------------------------------------------------------------
 
-	void set_NodeMatrix(NodeT* const node, const mat4_t& m)
+	void setNodeMatrix(NodeT* const node, const mat4_t& m)
 	{
 		if (node)
 		{
@@ -533,7 +465,7 @@ namespace glTF_2_0
 
 	//---
 
-	void set_NodeRotation(NodeT* const node, const quat_t& q)
+	void setNodeRotation(NodeT* const node, const quat_t& q)
 	{
 		if (node)
 		{
@@ -546,7 +478,7 @@ namespace glTF_2_0
 
 	//---
 
-	void set_NodeScale(NodeT* const node, const vec3_t& v)
+	void setNodeScale(NodeT* const node, const vec3_t& v)
 	{
 		if (node)
 		{
@@ -559,7 +491,7 @@ namespace glTF_2_0
 
 	//---
 
-	void set_NodeTranslation(NodeT* const node, const vec3_t& v)
+	void setNodeTranslation(NodeT* const node, const vec3_t& v)
 	{
 		if (node)
 		{

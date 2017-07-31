@@ -1,21 +1,24 @@
-#include "flatgltf/2.0/glTF_api.h"
 #include "flatgltf/2.0/glTF_generated.h"
+#include "flatgltf/2.0/glTFapi.hpp"
 
-#include "glTF_internal_types.h"
+#include "glTFinternal.hpp"
+
+#define KHUTILS_ASSERTION_INLINE
+
+#include "khutils/assertion.hpp"
+#include "khutils/runtime_exceptions.hpp"
 
 #include <algorithm>
 #include <vector>
 
 namespace glTF_2_0
 {
-	using namespace detail;
-
 	///-----------------------------------------------------------------------
 	/// get-id
 	///-----------------------------------------------------------------------
 	// all functions return a glTFid_t >= 0 if found, < 0 if not
 
-	glTFid_t id_of(const glTF_Document* const doc, const AccessorT* const elem)
+	glTFid_t getId(const Document* const doc, const AccessorT* const elem)
 	{
 		if (!elem)
 		{
@@ -36,7 +39,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const AnimationT* const elem)
+	glTFid_t getId(const Document* const doc, const AnimationT* const elem)
 	{
 		if (!elem)
 		{
@@ -57,7 +60,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const BufferT* const elem)
+	glTFid_t getId(const Document* const doc, const BufferT* const elem)
 	{
 		if (!elem)
 		{
@@ -78,7 +81,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const BufferViewT* const elem)
+	glTFid_t getId(const Document* const doc, const BufferViewT* const elem)
 	{
 		if (!elem)
 		{
@@ -99,7 +102,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const CameraT* const elem)
+	glTFid_t getId(const Document* const doc, const CameraT* const elem)
 	{
 		if (!elem)
 		{
@@ -120,7 +123,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const ImageT* const elem)
+	glTFid_t getId(const Document* const doc, const ImageT* const elem)
 	{
 		if (!elem)
 		{
@@ -141,7 +144,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const MaterialT* const elem)
+	glTFid_t getId(const Document* const doc, const MaterialT* const elem)
 	{
 		if (!elem)
 		{
@@ -162,7 +165,7 @@ namespace glTF_2_0
 
 	//---
 
-	// glTFid_t id_of(const glTF_Document* const doc, const MeshPrimitiveT* const elem)
+	// glTFid_t getId(const Document* const doc, const MeshPrimitiveT* const elem)
 	// {
 	// 	if (!elem)
 	// 	{
@@ -183,7 +186,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const MeshT* const elem)
+	glTFid_t getId(const Document* const doc, const MeshT* const elem)
 	{
 		if (!elem)
 		{
@@ -204,7 +207,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const NodeT* const elem)
+	glTFid_t getId(const Document* const doc, const NodeT* const elem)
 	{
 		if (!elem)
 		{
@@ -225,7 +228,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const SceneT* const elem)
+	glTFid_t getId(const Document* const doc, const SceneT* const elem)
 	{
 		if (!elem)
 		{
@@ -246,7 +249,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const SamplerT* const elem)
+	glTFid_t getId(const Document* const doc, const SamplerT* const elem)
 	{
 		if (!elem)
 		{
@@ -267,7 +270,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const TextureT* const elem)
+	glTFid_t getId(const Document* const doc, const TextureT* const elem)
 	{
 		if (!elem)
 		{
@@ -288,7 +291,7 @@ namespace glTF_2_0
 
 	//---
 
-	glTFid_t id_of(const glTF_Document* const doc, const SkinT* const elem)
+	glTFid_t getId(const Document* const doc, const SkinT* const elem)
 	{
 		if (!elem)
 		{

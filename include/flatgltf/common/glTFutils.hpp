@@ -1,7 +1,7 @@
 #ifndef FLATGLTF_COMMON_UTILS_H_INC
 #define FLATGLTF_COMMON_UTILS_H_INC
 
-#include "../common/glTF_api_exports.h"
+#include "flatgltf/common/glTFapiexports.h"
 
 #include <cctype>
 #include <string>
@@ -13,21 +13,21 @@ namespace glTF_common
 	/// Base64 tools
 	///-----------------------------------------------------------------------
 
-	bool				 is_DataUri(const char* uri);
-	bool				 is_DataUri(const std::string& uri);
-	std::string			 get_UriMimeType(const char* uri);
-	std::string			 get_UriMimeType(const std::string& uri);
-	std::string			 get_UriBase64(const char* uri);
-	std::string			 get_UriBase64(const std::string& uri);
-	std::vector<uint8_t> convert_UriToData(const char* uri);
-	std::vector<uint8_t> convert_UriToData(const std::string& uri);
-	std::string			 convert_DataToUri(const uint8_t* const, size_t, const char* mimeType = nullptr);
-	std::string			 convert_DataToUri(const std::vector<uint8_t>&, const char* mimeType = nullptr);
+	bool				 isDataUri(const char* uri);
+	bool				 isDataUri(const std::string& uri);
+	std::string			 getUriMimeType(const char* uri);
+	std::string			 getUriMimeType(const std::string& uri);
+	std::string			 getUriBase64(const char* uri);
+	std::string			 getUriBase64(const std::string& uri);
+	std::vector<uint8_t> convertUriToData(const char* uri);
+	std::vector<uint8_t> convertUriToData(const std::string& uri);
+	std::string			 convertDataToUri(const uint8_t* const, size_t, const char* mimeType = nullptr);
+	std::string			 convertDataToUri(const std::vector<uint8_t>&, const char* mimeType = nullptr);
 
-	std::vector<uint8_t> decode_Base64(const char* b64sz);
-	std::vector<uint8_t> decode_Base64(const std::string& b64sz);
-	std::string			 encode_Base64(const uint8_t* const, size_t);
-	std::string			 encode_Base64(const std::vector<uint8_t>&);
+	std::vector<uint8_t> decodeBase64(const char* b64sz);
+	std::vector<uint8_t> decodeBase64(const std::string& b64sz);
+	std::string			 encodeBase64(const uint8_t* const, size_t);
+	std::string			 encodeBase64(const std::vector<uint8_t>&);
 
 	///-----------------------------------------------------------------------
 	///-----------------------------------------------------------------------

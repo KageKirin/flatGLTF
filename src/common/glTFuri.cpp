@@ -1,4 +1,10 @@
-#include "flatgltf/common/glTF_utils.h"
+#include "flatgltf/common/glTFutils.hpp"
+
+#define KHUTILS_ASSERTION_INLINE
+
+#include "khutils/assertion.hpp"
+#include "khutils/runtime_exceptions.hpp"
+
 
 #include <cctype>
 #include <regex>
@@ -13,19 +19,19 @@ namespace glTF_common
 
 	static constexpr char* reDataUri = R"(/^data:(.*?)(;base64)?,(.*)$/;)";
 
-	bool is_DataUri(const char* uri)
+	bool isDataUri(const char* uri)
 	{
 		return std::regex_match(uri, std::regex(reDataUri));
 	}
 
-	bool is_DataUri(const std::string& uri)
+	bool isDataUri(const std::string& uri)
 	{
-		return is_DataUri(uri.c_str());
+		return isDataUri(uri.c_str());
 	}
 
 	//---
 
-	inline std::string get_UriPart(const char* uri, size_t part)
+	inline std::string getUriPart(const char* uri, size_t part)
 	{
 		std::cmatch matches;
 		if (std::regex_match(uri, matches, std::regex(reDataUri)))
@@ -38,39 +44,39 @@ namespace glTF_common
 		return std::string();
 	}
 
-	std::string get_MimeType(const char* uri)
+	std::string getMimeType(const char* uri)
 	{
-		return get_UriPart(uri, 1);
+		return getUriPart(uri, 1);
 	}
 
-	std::string get_MimeType(const std::string& uri)
+	std::string getMimeType(const std::string& uri)
 	{
-		return get_MimeType(uri.c_str());
-	}
-
-	//---
-
-	std::vector<uint8_t> convert_UriToData(const char* uri)
-	{
-		return decode_Base64(get_UriPart(uri, 2));
-	}
-
-	std::vector<uint8_t> convert_UriToData(const std::string& uri)
-	{
-		return convert_UriToData(uri.c_str());
+		return getMimeType(uri.c_str());
 	}
 
 	//---
 
-	std::string convert_DataToUri(const uint8_t* const data, size_t length, const char* mimeType)
+	std::vector<uint8_t> convertUriToData(const char* uri)
+	{
+		return decodeBase64(getUriPart(uri, 2));
+	}
+
+	std::vector<uint8_t> convertUriToData(const std::string& uri)
+	{
+		return convertUriToData(uri.c_str());
+	}
+
+	//---
+
+	std::string convertDataToUri(const uint8_t* const data, size_t length, const char* mimeType)
 	{
 		// data:application/octet-stream;base64,<data>
-		return std::string("data:") + mimeType + ";base64," + encode_Base64(data, length);
+		return std::string("data:") + mimeType + ";base64," + encodeBase64(data, length);
 	}
 
-	std::string convert_DataToUri(const std::vector<uint8_t>& data, const char* mimeType)
+	std::string convertDataToUri(const std::vector<uint8_t>& data, const char* mimeType)
 	{
-		return convert_DataToUri(data.data(), data.size(), mimeType);
+		return convertDataToUri(data.data(), data.size(), mimeType);
 	}
 
 
@@ -78,24 +84,24 @@ namespace glTF_common
 
 	static const std::string base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	std::vector<uint8_t> decode_Base64(const char* base64)
+	std::vector<uint8_t> decodeBase64(const char* base64)
 	{
 	}
 
-	std::vector<uint8_t> decode_Base64(const std::string& base64)
+	std::vector<uint8_t> decodeBase64(const std::string& base64)
 	{
-		return decode_Base64(base64.c_str());
+		return decodeBase64(base64.c_str());
 	}
 
 	//---
 
-	std::string encode_Base64(const uint8_t* const data, size_t size)
+	std::string encodeBase64(const uint8_t* const data, size_t size)
 	{
 	}
 
-	std::string encode_Base64(const std::vector<uint8_t>& data)
+	std::string encodeBase64(const std::vector<uint8_t>& data)
 	{
-		return encode_Base64(data.data(), data.size());
+		return encodeBase64(data.data(), data.size());
 	}
 
 	///-----------------------------------------------------------------------

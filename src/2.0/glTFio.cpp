@@ -1,12 +1,15 @@
-#include "flatgltf/2.0/glTF_api.h"
 #include "flatgltf/2.0/glTF_generated.h"
-#include "glTF_internal_types.h"
+#include "flatgltf/2.0/glTFapi.hpp"
+#include "glTFinternal.hpp"
 
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/idl.h"
 
+#define KHUTILS_ASSERTION_INLINE
+#include "khutils/assertion.hpp"
+#include "khutils/runtime_exceptions.hpp"
+
 #include <algorithm>
-#include <cassert>	//TODO: improve using catch later
 #include <memory>
 #include <numeric>
 #include <string>
@@ -27,8 +30,6 @@ extern const std::string flatgltf_2_0_schema;
 
 namespace glTF_2_0
 {
-	using namespace detail;
-
 	///------------------------------------------------------------------------
 	/// types for GLB files
 	///------------------------------------------------------------------------
@@ -45,6 +46,7 @@ namespace glTF_2_0
 		uint32_t length;
 	};
 	static_assert(sizeof(GLBHeader) == 12, "GLBHeader is not 12 bytes");
+
 
 	MANUALLY_ALIGNED_STRUCT(4) GLBChunkHeader
 	{
@@ -72,8 +74,10 @@ namespace glTF_2_0
 		return opts;
 	};
 
-	static std::string to_json(const Root_t& instance)
+	std::string to_json(const RootT* const instance)
 	{
+		// KHUTILS_ASSERT_PTR(instance);
+
 		flatbuffers::Parser parser(getIDLOptions());
 		bool				parseOk = parser.Parse(flatgltf_2_0_schema.c_str(), nullptr, "glTF_2.0.fbs");
 		assert_msg(parseOk, parser.error_.c_str());
@@ -83,15 +87,21 @@ namespace glTF_2_0
 		}
 
 		std::string jsongen;
-		auto		root = CreateRoot(parser.builder_, instance.get());
+		auto		root = CreateRoot(parser.builder_, instance);
 		FinishRootBuffer(parser.builder_, root);
 		GenerateText(parser, parser.builder_.GetBufferPointer(), &jsongen);
 		return jsongen;
 	}
 
+	std::string to_json(const Root_t& instance)
+	{
+		// KHUTILS_ASSERT_PTR(instance);
+		return to_json(instance.get());
+	}
+
 	//---
 
-	static Root_t from_json(const std::string& json)
+	RootT* const from_json(const std::string& json)
 	{
 		puts(json.c_str());
 
@@ -100,57 +110,73 @@ namespace glTF_2_0
 		assert_msg(parseOk, parser.error_.c_str());
 		if (!parseOk)
 		{
-			return Root_t();
+			return nullptr;
 		}
 
 		parseOk = parseOk && parser.Parse(json.c_str());
 		assert_msg(parseOk, parser.error_.c_str());
 		if (!parseOk)
 		{
-			return Root_t();
+			return nullptr;
 		}
 
 		auto root = flatbuffers::GetRoot<Root>(parser.builder_.GetBufferPointer());
-		return Root_t{root->UnPack()};
+		return root->UnPack();
+	}
+
+	Root_t from_json_internal(const std::string& json)
+	{
+		return Root_t{from_json(json)};
 	}
 
 	///------------------------------------------------------------------------
 	/// flatbuffer marshalling/unmarshalling
 	///------------------------------------------------------------------------
 
-	static std::vector<uint8_t> to_flatbuffer(const Root_t& instance)
+	std::vector<uint8_t> to_flatbuffer(const RootT* const instance)
 	{
+		// KHUTILS_ASSERT_PTR(instance);
+
 		flatbuffers::FlatBufferBuilder builder_;
-		auto						   root = CreateRoot(builder_, instance.get());
+		auto						   root = CreateRoot(builder_, instance);
 		FinishRootBuffer(builder_, root);
 		return std::vector<uint8_t>{builder_.GetBufferPointer(), builder_.GetBufferPointer() + builder_.GetSize()};
 	}
 
-	//---
-
-	static Root_t from_flatbuffer(const std::vector<uint8_t>& buffer)
+	std::vector<uint8_t> to_flatbuffer(const Root_t& instance)
 	{
-		auto root = flatbuffers::GetRoot<Root>(buffer.data());
-		return Root_t{root->UnPack()};
+		// KHUTILS_ASSERT_PTR(instance);
+		return to_flatbuffer(instance.get());
 	}
 
-	//-------------------------------------------------------------------------
-	//-------------------------------------------------------------------------
+	//---
+
+	RootT* const from_flatbuffer(const std::vector<uint8_t>& buffer)
+	{
+		auto root = flatbuffers::GetRoot<Root>(buffer.data());
+		return root->UnPack();
+	}
+
+	Root_t from_flatbuffer_internal(const std::vector<uint8_t>& buffer)
+	{
+		return Root_t{from_flatbuffer(buffer)};
+	}
+
 
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
-	bool load_Document_buffer(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
+	bool loadDocument_json_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
 		std::string json(reinterpret_cast<const char*>(buffer.data()), buffer.size() - 1);
-		doc->root = from_json(json);
+		doc->root = from_json_internal(json);
 		return true;
 	}
 
 	//---
 
-	std::vector<uint8_t> save_Document_buffer(const glTF_Document* const doc)
+	std::vector<uint8_t> saveDocument_json_buffer(const Document* const doc)
 	{
 		assert(doc);
 		auto json = to_json(doc->root);
@@ -160,7 +186,7 @@ namespace glTF_2_0
 
 	//-------------------------------------------------------------------------
 
-	bool load_Document_binary_buffer(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
+	bool loadDocument_glb_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
 		assert(!buffer.empty());
@@ -182,7 +208,7 @@ namespace glTF_2_0
 		std::string jsonString(reinterpret_cast<const char*>(&*(buffer.begin() + sizeof(GLBHeader) + sizeof(GLBChunkHeader))));
 		assert(!jsonString.empty());
 
-		doc->root = from_json(jsonString);
+		doc->root = from_json_internal(jsonString);
 
 		// check if there's more data, i.e. binary chunk
 		if (header.length > sizeof(GLBHeader) + sizeof(GLBChunkHeader) + jsChunk.chunkLength)
@@ -204,7 +230,7 @@ namespace glTF_2_0
 
 	//---
 
-	std::vector<uint8_t> save_Document_binary_buffer(const glTF_Document* const doc)
+	std::vector<uint8_t> saveDocument_glb_buffer(const Document* const doc)
 	{
 		assert(doc);
 		auto jsonString = to_json(doc->root);
@@ -241,16 +267,16 @@ namespace glTF_2_0
 
 	//-------------------------------------------------------------------------
 
-	bool load_Document_flat_buffer(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
+	bool loadDocument_glf_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		doc->root = from_flatbuffer(buffer);
+		doc->root = from_flatbuffer_internal(buffer);
 		return true;
 	}
 
 	//---
 
-	std::vector<uint8_t> save_Document_flat_buffer(const glTF_Document* const doc)
+	std::vector<uint8_t> saveDocument_glf_buffer(const Document* const doc)
 	{
 		assert(doc);
 		return to_flatbuffer(doc->root);
@@ -260,9 +286,9 @@ namespace glTF_2_0
 	//-------------------------------------------------------------------------
 
 
-	typedef bool (*_Document_load_buffer_t)(glTF_Document* const, const std::vector<uint8_t>&);
+	typedef bool (*Document_load_buffer_t)(Document* const, const std::vector<uint8_t>&);
 
-	static bool _load_file(glTF_Document* const doc, FILE* file, _Document_load_buffer_t loader)
+	static bool _load_file(Document* const doc, FILE* file, Document_load_buffer_t loader)
 	{
 		assert(doc);
 		std::vector<uint8_t> buffer;
@@ -276,7 +302,7 @@ namespace glTF_2_0
 
 	//---
 
-	static bool _load_uri(glTF_Document* const doc, const char* uri, _Document_load_buffer_t loader)
+	static bool _load_uri(Document* const doc, const char* uri, Document_load_buffer_t loader)
 	{
 		assert(doc);
 		auto file = std::unique_ptr<FILE, decltype(&fclose)>(fopen(uri, "rb"), fclose);
@@ -285,7 +311,7 @@ namespace glTF_2_0
 
 	//---
 
-	static bool _load_stream(glTF_Document* const doc, std::istream& ins, _Document_load_buffer_t loader)
+	static bool _load_stream(Document* const doc, std::istream& ins, Document_load_buffer_t loader)
 	{
 		assert(doc);
 		std::vector<uint8_t> buffer;
@@ -303,100 +329,100 @@ namespace glTF_2_0
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
-	bool load_Document(glTF_Document* const doc, const char* uri)
+	bool loadDocument_json(Document* const doc, const char* uri)
 	{
 		assert(doc);
-		return _load_uri(doc, uri, &load_Document_buffer);
+		return _load_uri(doc, uri, &loadDocument_json_buffer);
 	}
 
 	//---
 
-	bool load_Document(glTF_Document* const doc, FILE* file)
+	bool loadDocument_json(Document* const doc, FILE* file)
 	{
 		assert(doc);
-		return _load_file(doc, file, load_Document_buffer);
+		return _load_file(doc, file, loadDocument_json_buffer);
 	}
 
 	//---
 
-	bool load_Document(glTF_Document* const doc, std::istream& ins)
+	bool loadDocument_json(Document* const doc, std::istream& ins)
 	{
 		assert(doc);
-		return _load_stream(doc, ins, load_Document_buffer);
+		return _load_stream(doc, ins, loadDocument_json_buffer);
 	}
 
 	//---
 
-	bool load_Document(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
+	bool loadDocument_json(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		return load_Document_buffer(doc, buffer);
-	}
-
-	//---
-	//---
-
-	bool load_Document_binary(glTF_Document* const doc, const char* uri)
-	{
-		assert(doc);
-		return _load_uri(doc, uri, load_Document_binary_buffer);
-	}
-
-	//---
-
-	bool load_Document_binary(glTF_Document* const doc, FILE* file)
-	{
-		assert(doc);
-		return _load_file(doc, file, load_Document_binary_buffer);
-	}
-
-	//---
-
-	bool load_Document_binary(glTF_Document* const doc, std::istream& ins)
-	{
-		assert(doc);
-		return _load_stream(doc, ins, load_Document_binary_buffer);
-	}
-
-	//---
-
-	bool load_Document_binary(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
-	{
-		assert(doc);
-		return load_Document_binary_buffer(doc, buffer);
+		return loadDocument_json_buffer(doc, buffer);
 	}
 
 	//---
 	//---
 
-	bool load_Document_flat(glTF_Document* const doc, const char* uri)
+	bool loadDocument_glb(Document* const doc, const char* uri)
 	{
 		assert(doc);
-		return _load_uri(doc, uri, load_Document_flat_buffer);
+		return _load_uri(doc, uri, loadDocument_glb_buffer);
 	}
 
 	//---
 
-	bool load_Document_flat(glTF_Document* const doc, FILE* file)
+	bool loadDocument_glb(Document* const doc, FILE* file)
 	{
 		assert(doc);
-		return _load_file(doc, file, load_Document_flat_buffer);
+		return _load_file(doc, file, loadDocument_glb_buffer);
 	}
 
 	//---
 
-	bool load_Document_flat(glTF_Document* const doc, std::istream& ins)
+	bool loadDocument_glb(Document* const doc, std::istream& ins)
 	{
 		assert(doc);
-		return _load_stream(doc, ins, load_Document_flat_buffer);
+		return _load_stream(doc, ins, loadDocument_glb_buffer);
 	}
 
 	//---
 
-	bool load_Document_flat(glTF_Document* const doc, const std::vector<uint8_t>& buffer)
+	bool loadDocument_glb(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		return load_Document_flat_buffer(doc, buffer);
+		return loadDocument_glb_buffer(doc, buffer);
+	}
+
+	//---
+	//---
+
+	bool loadDocument_glf(Document* const doc, const char* uri)
+	{
+		assert(doc);
+		return _load_uri(doc, uri, loadDocument_glf_buffer);
+	}
+
+	//---
+
+	bool loadDocument_glf(Document* const doc, FILE* file)
+	{
+		assert(doc);
+		return _load_file(doc, file, loadDocument_glf_buffer);
+	}
+
+	//---
+
+	bool loadDocument_glf(Document* const doc, std::istream& ins)
+	{
+		assert(doc);
+		return _load_stream(doc, ins, loadDocument_glf_buffer);
+	}
+
+	//---
+
+	bool loadDocument_glf(Document* const doc, const std::vector<uint8_t>& buffer)
+	{
+		assert(doc);
+		return loadDocument_glf_buffer(doc, buffer);
 	}
 
 	//---
@@ -437,102 +463,102 @@ namespace glTF_2_0
 	//---
 	//---
 
-	bool save_Document(const glTF_Document* const doc, const char* uri)
+	bool saveDocument_json(const Document* const doc, const char* uri)
 	{
 		assert(doc);
-		return _save_uri(uri, save_Document_buffer(doc));
+		return _save_uri(uri, saveDocument_json_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document(const glTF_Document* const doc, FILE* file)
+	bool saveDocument_json(const Document* const doc, FILE* file)
 	{
 		assert(doc);
-		return _save_file(file, save_Document_buffer(doc));
+		return _save_file(file, saveDocument_json_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document(const glTF_Document* const doc, std::ostream& outs)
+	bool saveDocument_json(const Document* const doc, std::ostream& outs)
 	{
 		assert(doc);
-		return _save_stream(outs, save_Document_buffer(doc));
+		return _save_stream(outs, saveDocument_json_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document(const glTF_Document* const doc, std::vector<uint8_t>& buffer)
+	bool saveDocument_json(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		buffer = save_Document_buffer(doc);
+		buffer = saveDocument_json_buffer(doc);
 		return true;
 	}
 
 	//---
 	//---
 
-	bool save_Document_binary(const glTF_Document* const doc, const char* uri)
+	bool saveDocument_glb(const Document* const doc, const char* uri)
 	{
 		assert(doc);
-		return _save_uri(uri, save_Document_binary_buffer(doc));
+		return _save_uri(uri, saveDocument_glb_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_binary(const glTF_Document* const doc, FILE* file)
+	bool saveDocument_glb(const Document* const doc, FILE* file)
 	{
 		assert(doc);
-		return _save_file(file, save_Document_binary_buffer(doc));
+		return _save_file(file, saveDocument_glb_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_binary(const glTF_Document* const doc, std::ostream& outs)
+	bool saveDocument_glb(const Document* const doc, std::ostream& outs)
 	{
 		assert(doc);
-		return _save_stream(outs, save_Document_binary_buffer(doc));
+		return _save_stream(outs, saveDocument_glb_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_binary(const glTF_Document* const doc, std::vector<uint8_t>& buffer)
+	bool saveDocument_glb(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		buffer = save_Document_binary_buffer(doc);
+		buffer = saveDocument_glb_buffer(doc);
 		return true;
 	}
 
 	//---
 	//---
 
-	bool save_Document_flat(const glTF_Document* const doc, const char* uri)
+	bool saveDocument_glf(const Document* const doc, const char* uri)
 	{
 		assert(doc);
-		return _save_uri(uri, save_Document_flat_buffer(doc));
+		return _save_uri(uri, saveDocument_glf_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_flat(const glTF_Document* const doc, FILE* file)
+	bool saveDocument_glf(const Document* const doc, FILE* file)
 	{
 		assert(doc);
-		return _save_file(file, save_Document_flat_buffer(doc));
+		return _save_file(file, saveDocument_glf_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_flat(const glTF_Document* const doc, std::ostream& outs)
+	bool saveDocument_glf(const Document* const doc, std::ostream& outs)
 	{
 		assert(doc);
-		return _save_stream(outs, save_Document_flat_buffer(doc));
+		return _save_stream(outs, saveDocument_glf_buffer(doc));
 	}
 
 	//---
 
-	bool save_Document_flat(const glTF_Document* const doc, std::vector<uint8_t>& buffer)
+	bool saveDocument_glf(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
 		assert(doc);
-		buffer = save_Document_flat_buffer(doc);
+		buffer = saveDocument_glf_buffer(doc);
 		return true;
 	}
 
@@ -540,7 +566,7 @@ namespace glTF_2_0
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
-	bool load_Document_bindata(glTF_Document* const doc)
+	bool loadDocument_bindata(Document* const doc)
 	{
 		assert(doc);
 		// TODO: implementation
@@ -549,7 +575,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool save_Document_bindata(const glTF_Document* const doc)
+	bool saveDocument_bindata(const Document* const doc)
 	{
 		assert(doc);
 
@@ -559,7 +585,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool load_Document_bindata(std::vector<uint8_t>& bindata, const char* uri)
+	bool loadDocument_bindata(std::vector<uint8_t>& bindata, const char* uri)
 	{
 		// TODO: implementation
 		return false;
@@ -567,7 +593,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool load_Document_bindata(std::vector<uint8_t>& bindata, FILE* file)
+	bool loadDocument_bindata(std::vector<uint8_t>& bindata, FILE* file)
 	{
 		// TODO: implementation
 		return false;
@@ -575,7 +601,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool load_Document_bindata(std::vector<uint8_t>& buffer, std::istream&)
+	bool loadDocument_bindata(std::vector<uint8_t>& buffer, std::istream&)
 	{
 		// TODO: implementation
 		return false;
@@ -583,7 +609,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool save_Document_bindata(const std::vector<uint8_t>& bindata, const char* uri)
+	bool saveDocument_bindata(const std::vector<uint8_t>& bindata, const char* uri)
 	{
 		// TODO: implementation
 		return false;
@@ -591,7 +617,7 @@ namespace glTF_2_0
 
 	//---
 
-	bool save_Document_bindata(const std::vector<uint8_t>& bindata, FILE* file)
+	bool saveDocument_bindata(const std::vector<uint8_t>& bindata, FILE* file)
 	{
 		// TODO: implementation
 		return false;
@@ -599,13 +625,25 @@ namespace glTF_2_0
 
 	//---
 
-	bool save_Document_bindata(const std::vector<uint8_t>& buffer, std::ostream&)
+	bool saveDocument_bindata(const std::vector<uint8_t>& buffer, std::ostream&)
 	{
 		// TODO: implementation
 		return false;
 	}
 
-	//---
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+
+	bool loadDocument(Document* const, const char* uri)
+	{
+		return false;
+	}
+
+	bool saveDocument(const Document* const, const char* uri)
+	{
+		return false;
+	}
+
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
