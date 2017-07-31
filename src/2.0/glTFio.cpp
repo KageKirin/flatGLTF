@@ -1,5 +1,7 @@
+#include "flatgltf/2.0/glTFio.hpp"
 #include "flatgltf/2.0/glTF_generated.h"
 #include "flatgltf/2.0/glTFapi.hpp"
+#include "flatgltf/common/glTFutils.hpp"
 #include "glTFinternal.hpp"
 
 #include "flatbuffers/flatbuffers.h"
@@ -7,7 +9,13 @@
 
 #define KHUTILS_ASSERTION_INLINE
 #include "khutils/assertion.hpp"
+#include "khutils/file.hpp"
+#include "khutils/logging.hpp"
 #include "khutils/runtime_exceptions.hpp"
+
+/// terribly sorry for this dependency. will remove asap
+#include <boost/filesystem/path.hpp>
+
 
 #include <algorithm>
 #include <memory>
@@ -18,18 +26,11 @@
 // flatbuffer schema string for parser
 extern const std::string flatgltf_2_0_schema;
 
-#define assert_msg(x, msg)                                                                                             \
-	{                                                                                                                  \
-		bool cond = (x);                                                                                               \
-		if (!cond)                                                                                                     \
-		{                                                                                                              \
-			puts(msg);                                                                                                 \
-		}                                                                                                              \
-		assert(cond);                                                                                                  \
-	}
 
 namespace glTF_2_0
 {
+	using namespace glTF_common;
+
 	///------------------------------------------------------------------------
 	/// types for GLB files
 	///------------------------------------------------------------------------
@@ -80,7 +81,7 @@ namespace glTF_2_0
 
 		flatbuffers::Parser parser(getIDLOptions());
 		bool				parseOk = parser.Parse(flatgltf_2_0_schema.c_str(), nullptr, "glTF_2.0.fbs");
-		assert_msg(parseOk, parser.error_.c_str());
+		KHUTILS_ASSERT_MSG(parseOk, parser.error_.c_str());
 		if (!parseOk)
 		{
 			return parser.error_;
@@ -107,14 +108,14 @@ namespace glTF_2_0
 
 		flatbuffers::Parser parser;
 		bool				parseOk = parser.Parse(flatgltf_2_0_schema.c_str(), nullptr, "glTF_2.0.fbs");
-		assert_msg(parseOk, parser.error_.c_str());
+		KHUTILS_ASSERT_MSG(parseOk, parser.error_.c_str());
 		if (!parseOk)
 		{
 			return nullptr;
 		}
 
 		parseOk = parseOk && parser.Parse(json.c_str());
-		assert_msg(parseOk, parser.error_.c_str());
+		KHUTILS_ASSERT_MSG(parseOk, parser.error_.c_str());
 		if (!parseOk)
 		{
 			return nullptr;
@@ -168,7 +169,7 @@ namespace glTF_2_0
 
 	bool loadDocument_json_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		std::string json(reinterpret_cast<const char*>(buffer.data()), buffer.size() - 1);
 		doc->root = from_json_internal(json);
 		return true;
@@ -178,7 +179,7 @@ namespace glTF_2_0
 
 	std::vector<uint8_t> saveDocument_json_buffer(const Document* const doc)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		auto json = to_json(doc->root);
 		return std::vector<uint8_t>{reinterpret_cast<const uint8_t*>(&*json.begin()),
 									reinterpret_cast<const uint8_t*>(&*json.end())};
@@ -188,17 +189,17 @@ namespace glTF_2_0
 
 	bool loadDocument_glb_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
-		assert(!buffer.empty());
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(buffer);
 		if (buffer.empty())
 		{
 			return false;
 		}
 
 		const GLBHeader& header = *reinterpret_cast<const GLBHeader*>(&*buffer.begin());
-		assert(header.magic == (uint32_t)GLBConstant::magic);
-		assert(header.version == (uint32_t)GLBConstant::version);
-		assert(header.length == buffer.size());
+		KHUTILS_ASSERT_EQUALS(header.magic, (uint32_t)GLBConstant::magic);
+		KHUTILS_ASSERT_EQUALS(header.version, (uint32_t)GLBConstant::version);
+		KHUTILS_ASSERT_EQUALS(header.length, (uint32_t)buffer.size());
 
 		const GLBChunkHeader& jsChunk = *reinterpret_cast<const GLBChunkHeader*>(&*(buffer.begin() + sizeof(GLBHeader)));
 		assert(jsChunk.chunkType == (uint32_t)GLBConstant::json);
@@ -206,7 +207,7 @@ namespace glTF_2_0
 		assert((jsChunk.chunkLength % 4) == 0);
 
 		std::string jsonString(reinterpret_cast<const char*>(&*(buffer.begin() + sizeof(GLBHeader) + sizeof(GLBChunkHeader))));
-		assert(!jsonString.empty());
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(jsonString);
 
 		doc->root = from_json_internal(jsonString);
 
@@ -232,7 +233,7 @@ namespace glTF_2_0
 
 	std::vector<uint8_t> saveDocument_glb_buffer(const Document* const doc)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		auto jsonString = to_json(doc->root);
 		jsonString.resize(jsonString.size() + jsonString.size() % 4, 0x20);	// pad to alignment with spaces
 
@@ -244,8 +245,8 @@ namespace glTF_2_0
 		buffer.reserve(sizeof(GLBHeader) + 2 * sizeof(GLBChunkHeader) + jsonString.size() + bindataSize);
 
 		GLBHeader header;
-		assert(header.magic == (uint32_t)GLBConstant::magic);
-		assert(header.version == (uint32_t)GLBConstant::version);
+		KHUTILS_ASSERT_EQUALS(header.magic, (uint32_t)GLBConstant::magic);
+		KHUTILS_ASSERT_EQUALS(header.version, (uint32_t)GLBConstant::version);
 		header.length = buffer.size();
 
 		GLBChunkHeader jsChunk{(uint32_t)jsonString.size(), (uint32_t)GLBConstant::json};
@@ -261,7 +262,7 @@ namespace glTF_2_0
 			std::fill_n(bi, kvp.second.size() % 4, 0x0);	// pad to alignment with 0
 		});
 
-		assert(!buffer.empty());
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(buffer);
 		return buffer;
 	}
 
@@ -269,7 +270,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glf_buffer(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		doc->root = from_flatbuffer_internal(buffer);
 		return true;
 	}
@@ -278,51 +279,74 @@ namespace glTF_2_0
 
 	std::vector<uint8_t> saveDocument_glf_buffer(const Document* const doc)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return to_flatbuffer(doc->root);
 	}
 
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
-
-	typedef bool (*Document_load_buffer_t)(Document* const, const std::vector<uint8_t>&);
-
-	static bool _load_file(Document* const doc, FILE* file, Document_load_buffer_t loader)
+	static bool _load_file(FILE* file, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
-		std::vector<uint8_t> buffer;
-		auto				 bi = std::back_inserter(buffer);
+		KHUTILS_ASSERT_PTR(file);
+		auto bi = std::back_inserter(buffer);
 		while (file && !feof(file))
 		{
 			*bi++ = fgetc(file);
 		}
-		return loader(doc, buffer);
+		return true;
 	}
 
 	//---
 
-	static bool _load_uri(Document* const doc, const char* uri, Document_load_buffer_t loader)
+	static bool _load_uri(const char* uri, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(uri);
 		auto file = std::unique_ptr<FILE, decltype(&fclose)>(fopen(uri, "rb"), fclose);
-		return _load_file(doc, file.get(), loader);
+		return _load_file(file.get(), buffer);
 	}
 
 	//---
 
-	static bool _load_stream(Document* const doc, std::istream& ins, Document_load_buffer_t loader)
+	static bool _load_stream(std::istream& ins, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
-		std::vector<uint8_t> buffer;
-		auto				 bi = std::back_inserter(buffer);
+		KHUTILS_ASSERT((bool)ins);
+		auto bi = std::back_inserter(buffer);
 		do
 		{
 			char c;
 			ins.read(&c, 1);
 			*bi++ = c;
 		} while (ins);
-		return loader(doc, buffer);
+		return true;
+	}
+
+
+	typedef bool (*Document_load_buffer_t)(Document* const, const std::vector<uint8_t>&);
+
+	static bool _load_file(Document* const doc, FILE* file, Document_load_buffer_t loader)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		std::vector<uint8_t> buffer;
+		return _load_file(file, buffer) && loader(doc, buffer);
+	}
+
+	//---
+
+	static bool _load_uri(Document* const doc, const char* uri, Document_load_buffer_t loader)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		std::vector<uint8_t> buffer;
+		return _load_uri(uri, buffer) && loader(doc, buffer);
+	}
+
+	//---
+
+	static bool _load_stream(Document* const doc, std::istream& ins, Document_load_buffer_t loader)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		std::vector<uint8_t> buffer;
+		return _load_stream(ins, buffer) && loader(doc, buffer);
 	}
 
 	//---
@@ -331,7 +355,7 @@ namespace glTF_2_0
 
 	bool loadDocument_json(Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_uri(doc, uri, &loadDocument_json_buffer);
 	}
 
@@ -339,7 +363,7 @@ namespace glTF_2_0
 
 	bool loadDocument_json(Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_file(doc, file, loadDocument_json_buffer);
 	}
 
@@ -347,7 +371,7 @@ namespace glTF_2_0
 
 	bool loadDocument_json(Document* const doc, std::istream& ins)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_stream(doc, ins, loadDocument_json_buffer);
 	}
 
@@ -355,7 +379,7 @@ namespace glTF_2_0
 
 	bool loadDocument_json(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return loadDocument_json_buffer(doc, buffer);
 	}
 
@@ -364,7 +388,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glb(Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_uri(doc, uri, loadDocument_glb_buffer);
 	}
 
@@ -372,7 +396,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glb(Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_file(doc, file, loadDocument_glb_buffer);
 	}
 
@@ -380,7 +404,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glb(Document* const doc, std::istream& ins)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_stream(doc, ins, loadDocument_glb_buffer);
 	}
 
@@ -388,7 +412,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glb(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return loadDocument_glb_buffer(doc, buffer);
 	}
 
@@ -397,7 +421,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glf(Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_uri(doc, uri, loadDocument_glf_buffer);
 	}
 
@@ -405,7 +429,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glf(Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_file(doc, file, loadDocument_glf_buffer);
 	}
 
@@ -413,7 +437,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glf(Document* const doc, std::istream& ins)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _load_stream(doc, ins, loadDocument_glf_buffer);
 	}
 
@@ -421,7 +445,7 @@ namespace glTF_2_0
 
 	bool loadDocument_glf(Document* const doc, const std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return loadDocument_glf_buffer(doc, buffer);
 	}
 
@@ -434,7 +458,7 @@ namespace glTF_2_0
 		if (file)
 		{
 			auto written = fwrite(buffer.data(), buffer.size(), 1, file);
-			return written == buffer.size();
+			return written == 1 && ftell(file) == buffer.size();
 		}
 		return false;
 	}
@@ -465,7 +489,7 @@ namespace glTF_2_0
 
 	bool saveDocument_json(const Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_uri(uri, saveDocument_json_buffer(doc));
 	}
 
@@ -473,7 +497,7 @@ namespace glTF_2_0
 
 	bool saveDocument_json(const Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_file(file, saveDocument_json_buffer(doc));
 	}
 
@@ -481,7 +505,7 @@ namespace glTF_2_0
 
 	bool saveDocument_json(const Document* const doc, std::ostream& outs)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_stream(outs, saveDocument_json_buffer(doc));
 	}
 
@@ -489,7 +513,7 @@ namespace glTF_2_0
 
 	bool saveDocument_json(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		buffer = saveDocument_json_buffer(doc);
 		return true;
 	}
@@ -499,7 +523,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glb(const Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_uri(uri, saveDocument_glb_buffer(doc));
 	}
 
@@ -507,7 +531,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glb(const Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_file(file, saveDocument_glb_buffer(doc));
 	}
 
@@ -515,7 +539,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glb(const Document* const doc, std::ostream& outs)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_stream(outs, saveDocument_glb_buffer(doc));
 	}
 
@@ -523,7 +547,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glb(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		buffer = saveDocument_glb_buffer(doc);
 		return true;
 	}
@@ -533,7 +557,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glf(const Document* const doc, const char* uri)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_uri(uri, saveDocument_glf_buffer(doc));
 	}
 
@@ -541,7 +565,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glf(const Document* const doc, FILE* file)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_file(file, saveDocument_glf_buffer(doc));
 	}
 
@@ -549,7 +573,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glf(const Document* const doc, std::ostream& outs)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		return _save_stream(outs, saveDocument_glf_buffer(doc));
 	}
 
@@ -557,7 +581,7 @@ namespace glTF_2_0
 
 	bool saveDocument_glf(const Document* const doc, std::vector<uint8_t>& buffer)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 		buffer = saveDocument_glf_buffer(doc);
 		return true;
 	}
@@ -568,79 +592,119 @@ namespace glTF_2_0
 
 	bool loadDocument_bindata(Document* const doc)
 	{
-		assert(doc);
-		// TODO: implementation
-		return false;
+		KHUTILS_ASSERT_PTR(doc);
+
+		return std::all_of(doc->root->buffers.begin(), doc->root->buffers.end(), [&](auto& buf) {
+			return isDataUri(buf->uri.c_str()) || loadDocument_bindata(createBindata(doc, buf->uri.c_str()), buf->uri.c_str());
+		});
 	}
 
 	//---
 
 	bool saveDocument_bindata(const Document* const doc)
 	{
-		assert(doc);
+		KHUTILS_ASSERT_PTR(doc);
 
-
-		return false;
+		return std::all_of(doc->bindata.begin(), doc->bindata.end(), [&](auto& bd) {
+			return saveDocument_bindata(bd.second, bd.first.c_str());
+		});
 	}
 
 	//---
 
 	bool loadDocument_bindata(std::vector<uint8_t>& bindata, const char* uri)
 	{
-		// TODO: implementation
-		return false;
+		if (isDataUri(uri))
+			return true;
+
+		return _load_uri(uri, bindata);
 	}
 
 	//---
 
 	bool loadDocument_bindata(std::vector<uint8_t>& bindata, FILE* file)
 	{
-		// TODO: implementation
-		return false;
+		return _load_file(file, bindata);
 	}
 
 	//---
 
-	bool loadDocument_bindata(std::vector<uint8_t>& buffer, std::istream&)
+	bool loadDocument_bindata(std::vector<uint8_t>& bindata, std::istream& ins)
 	{
-		// TODO: implementation
-		return false;
+		return _load_stream(ins, bindata);
 	}
 
 	//---
 
 	bool saveDocument_bindata(const std::vector<uint8_t>& bindata, const char* uri)
 	{
-		// TODO: implementation
-		return false;
+		KHUTILS_ASSERT(!isDataUri(uri));
+		return _save_uri(uri, bindata);
 	}
 
 	//---
 
 	bool saveDocument_bindata(const std::vector<uint8_t>& bindata, FILE* file)
 	{
-		// TODO: implementation
-		return false;
+		return _save_file(file, bindata);
 	}
 
 	//---
 
-	bool saveDocument_bindata(const std::vector<uint8_t>& buffer, std::ostream&)
+	bool saveDocument_bindata(const std::vector<uint8_t>& bindata, std::ostream& outs)
 	{
-		// TODO: implementation
-		return false;
+		return _save_stream(outs, bindata);
 	}
 
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
-	bool loadDocument(Document* const, const char* uri)
+	namespace fs = boost::filesystem;
+
+	bool loadDocument(Document* const doc, const char* uri)
 	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		auto p = fs::path(uri);
+		if (p.extension() == ".glb")
+		{
+			return loadDocument_glb(doc, uri);
+		}
+
+		if (p.extension() == ".glf")
+		{
+			return loadDocument_glf(doc, uri);
+		}
+
+		if (p.extension() == ".gltf")
+		{
+			return loadDocument_json(doc, uri) && loadDocument_bindata(doc);
+		}
+
 		return false;
 	}
 
-	bool saveDocument(const Document* const, const char* uri)
+	bool saveDocument(const Document* const doc, const char* uri)
 	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		auto p = fs::path(uri);
+		if (p.extension() == ".glb")
+		{
+			return saveDocument_glb(doc, uri);
+		}
+
+		if (p.extension() == ".glf")
+		{
+			return saveDocument_glf(doc, uri);
+		}
+
+		if (p.extension() == ".gltf")
+		{
+			return saveDocument_json(doc, uri) && saveDocument_bindata(doc);
+		}
+
+
 		return false;
 	}
 
