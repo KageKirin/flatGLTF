@@ -1,19 +1,22 @@
 //! test fot flatgltf / glTF 2.0 loading
 
-#include "flatgltf/2.0/glTF_api.h"
 #include "flatgltf/2.0/glTF_generated.h"
+#include "flatgltf/2.0/glTFapi.hpp"
+#include "flatgltf/2.0/glTFio.hpp"
 
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
 
-#include "catch.hpp"
+#define KHUTILS_LOGGING_IMPL
+#include "khutils/logging.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
 extern const std::string flatgltf_2_0_schema;
+using namespace glTF_2_0;
 
 int main(int argc, char** argv)
 {
@@ -51,13 +54,11 @@ int main(int argc, char** argv)
 	std::cout << "gltf json file could be loaded" << std::endl;
 	std::cout << gltfFileContents << std::endl;
 	{
-		auto doc
-		  = std::unique_ptr<glTF_2_0::glTF_Document, decltype(&glTF_2_0::destroy_Document)>(glTF_2_0::create_Document("test"),
-																							&glTF_2_0::destroy_Document);
+		auto doc = std::unique_ptr<Document, decltype(&destroyDocument)>(createDocument("test"), &destroyDocument);
 
 		std::cout << "----------------------" << std::endl;
 		auto iss	= std::istringstream(gltfFileContents);
-		bool loadOk = glTF_2_0::load_Document(doc.get(), iss);
+		bool loadOk = loadDocument_json(doc.get(), iss);
 		if (!loadOk)
 		{
 			std::cerr << "loading failed" << std::endl;
@@ -65,7 +66,7 @@ int main(int argc, char** argv)
 
 		std::cout << "----------------------" << std::endl;
 		auto oss	= std::ostringstream();
-		bool saveOk = glTF_2_0::save_Document(doc.get(), oss);
+		bool saveOk = saveDocument_json(doc.get(), oss);
 		std::cout << oss.str() << std::endl;
 		if (!saveOk)
 		{
