@@ -2,6 +2,7 @@
 #define FLATGLTF_2_0_IO_API_H_INC
 
 #include "flatgltf/2.0/glTF_generated.h"
+#include "flatgltf/2.0/glTFapi.hpp"
 #include "flatgltf/2.0/glTFmath_types.hpp"
 #include "flatgltf/common/glTFapiexports.h"
 
@@ -16,6 +17,9 @@ namespace glTF_2_0
 	///-----------------------------------------------------------------------
 	/// utility
 	///-----------------------------------------------------------------------
+
+	/// clone a document into a new one
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API cloneDocument(const Document* const source, Document* const target);
 
 	/// prepares glTF data for GLB serialization
 	//- changes URIs

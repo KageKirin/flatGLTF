@@ -15,6 +15,23 @@ namespace glTF_2_0
 	/// utility
 	///-----------------------------------------------------------------------
 
+	/// clone a document into a new one
+	bool cloneDocument(const Document* const source, Document* const target)
+	{
+		KHUTILS_ASSERT_PTR(source);
+		KHUTILS_ASSERT_PTR(target);
+
+		auto newRoot = from_flatbuffer_internal(to_flatbuffer(source->root));
+		target->root.swap(newRoot);
+		target->bindata.clear();
+		std::copy(source->bindata.begin(),
+				  source->bindata.end(),
+				  std::insert_iterator<decltype(target->bindata)>(target->bindata, target->bindata.end()));
+
+		return true;
+	}
+
+
 	/// prepares glTF data for GLB serialization
 	//- changes URIs
 	//- merges all mapped bindata into a single blob
