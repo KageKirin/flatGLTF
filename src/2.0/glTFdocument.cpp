@@ -8,6 +8,7 @@
 #include "khutils/assertion.hpp"
 #include "khutils/runtime_exceptions.hpp"
 
+#include <memory>
 
 namespace glTF_2_0
 {
@@ -32,6 +33,15 @@ namespace glTF_2_0
 		{
 			delete doc;
 		}
+	}
+
+	//---
+
+	// document creation
+
+	std::unique_ptr<Document, decltype(&destroyDocument)> createDocument(const std::string& name)
+	{
+		return std::unique_ptr<Document, decltype(&destroyDocument)>{createDocument(name.c_str()), &destroyDocument};
 	}
 
 	//-------------------------------------------------------------------------
