@@ -14,7 +14,9 @@ project "flatgltf_2_0_loader"
 	includedirs {
 		flatgltf_includedirs,
 		flatbuffers_includedirs,
-		catch_includedirs,
+		glm_includedirs,
+		khutils_includedirs,
+		bandit_includedirs,
 	}
 
 	defines {
