@@ -224,6 +224,26 @@ namespace glTF_2_0
 	SkinT* const	   getSkin(const Document* const, const char* name);
 
 	///-----------------------------------------------------------------------
+	/// get-by-name-or-create-new
+	/// note that names are optional and this might not work as expected
+	///-----------------------------------------------------------------------
+	// all functions return a const-pointer to mutable-object
+	// either the existing object or a new one
+	AccessorT* const   getOrCreateAccessor(Document* const, const char* name);
+	AnimationT* const  getOrCreateAnimation(Document* const, const char* name);
+	BufferT* const	 getOrCreateBuffer(Document* const, const char* name);
+	BufferViewT* const getOrCreateBufferView(Document* const, const char* name);
+	CameraT* const	 getOrCreateCamera(Document* const, const char* name);
+	ImageT* const	  getOrCreateImage(Document* const, const char* name);
+	MaterialT* const   getOrCreateMaterial(Document* const, const char* name);
+	MeshT* const	   getOrCreateMesh(Document* const, const char* name);
+	NodeT* const	   getOrCreateNode(Document* const, const char* name);
+	SceneT* const	  getOrCreateScene(Document* const, const char* name);
+	SamplerT* const	getOrCreateSampler(Document* const, const char* name);
+	TextureT* const	getOrCreateTexture(Document* const, const char* name);
+	SkinT* const	   getOrCreateSkin(Document* const, const char* name);
+
+	///-----------------------------------------------------------------------
 	/// get-id
 	///-----------------------------------------------------------------------
 	// all functions return a glTFid_t >= 0 if found, < 0 if not
