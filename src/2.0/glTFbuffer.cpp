@@ -17,6 +17,8 @@ namespace glTF_2_0
 
 	BufferT* const createBuffer(Document* const doc, const char* name)
 	{
+		KHUTILS_ASSERT_PTR(doc);
+
 		auto instance = Buffer_t{new BufferT};
 		if (name)
 		{
@@ -32,13 +34,15 @@ namespace glTF_2_0
 	// if name is null, data will be internal
 	BufferT* const createBuffer(Document* const doc, const char* uri, const char* name)
 	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(uri);
+
 		auto buffer = createBuffer(doc, name);
-		if (uri)
+		buffer->uri = uri;
+
+		if (!isDataUri(uri))
 		{
 			createBindata(doc, uri);
-		}
-		else
-		{
 		}
 
 		return buffer;
@@ -48,6 +52,7 @@ namespace glTF_2_0
 
 	std::vector<uint8_t>& createBindata(Document* const doc, const char* name)
 	{
+		KHUTILS_ASSERT_PTR(doc);
 		return getBindata(doc, name);
 	}
 
