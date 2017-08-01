@@ -468,9 +468,10 @@ namespace glTF_2_0
 		if (node)
 		{
 			auto msize = m.length() * mat4_t::col_type::length();
-			node->matrix.reserve(msize);
-			std::copy_n(&m[0][0], msize, std::back_inserter(node->matrix));
+			node->matrix.resize(msize);
+			std::copy_n(&m[0][0], msize, node->matrix.begin());
 
+			// reset RST
 			node->rotation.clear();
 			node->scale.clear();
 			node->translation.clear();
@@ -483,9 +484,10 @@ namespace glTF_2_0
 	{
 		if (node)
 		{
-			node->rotation.reserve(q.length());
-			std::copy_n(&q.x, q.length(), std::back_inserter(node->rotation));
+			node->rotation.resize(q.length());
+			std::copy_n(&q.x, q.length(), node->rotation.begin());
 
+			// reset matrix
 			node->matrix.clear();
 		}
 	}
@@ -496,9 +498,10 @@ namespace glTF_2_0
 	{
 		if (node)
 		{
-			node->scale.reserve(v.length());
-			std::copy_n(&v.x, v.length(), std::back_inserter(node->scale));
+			node->scale.resize(v.length());
+			std::copy_n(&v.x, v.length(), node->scale.begin());
 
+			// reset matrix
 			node->matrix.clear();
 		}
 	}
@@ -509,9 +512,10 @@ namespace glTF_2_0
 	{
 		if (node)
 		{
-			node->translation.reserve(v.length());
-			std::copy_n(&v.x, v.length(), std::back_inserter(node->translation));
+			node->translation.resize(v.length());
+			std::copy_n(&v.x, v.length(), node->translation.begin());
 
+			// reset matrix
 			node->matrix.clear();
 		}
 	}
