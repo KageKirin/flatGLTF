@@ -13,36 +13,6 @@
 
 namespace glTF_2_0
 {
-
-
-	///-----------------------------------------------------------------------
-	/// simple get for unique elements
-	///-----------------------------------------------------------------------
-
-	AssetT* const getAsset(const Document* const doc)
-	{
-		return (doc && doc->root) ? doc->root->asset.get() : nullptr;
-	}
-
-	SceneT* const getMainScene(const Document* const doc)
-	{
-		return (doc && doc->root) ? getScene(doc, doc->root->scene) : nullptr;
-	}
-
-	void setMainScene(Document* const doc, SceneT* const scene)
-	{
-		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(scene);
-		setMainScene(doc, getId(doc, scene));
-	}
-
-	void setMainScene(Document* const doc, glTFid_t id)
-	{
-		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_GREATEREQ(id, 0);
-		doc->root->scene = id;
-	}
-
 	///-----------------------------------------------------------------------
 	/// get-by-id
 	///-----------------------------------------------------------------------
@@ -340,23 +310,6 @@ namespace glTF_2_0
 
 	//---
 
-	// MeshPrimitiveT *const getMeshPrimitive(const Document* const doc, const char* name)
-	//{
-	//	if (doc && doc->root)
-	//	{
-	//		auto it = std::find_if(doc->root->meshprimitives.begin(), doc->root->meshprimitives.end(), [&name](auto&
-	// elem) { 			return elem && elem->name == name;
-	//		});
-	//		if (it != doc->root->meshprimitives.end())
-	//		{
-	//			return it->get();
-	//		}
-	//	}
-	//	return nullptr;
-	//}
-
-	//---
-
 	MeshT* const getMesh(const Document* const doc, const char* name)
 	{
 		if (doc && doc->root)
@@ -455,69 +408,6 @@ namespace glTF_2_0
 			}
 		}
 		return nullptr;
-	}
-
-	//---
-
-	///-----------------------------------------------------------------------
-	/// set-transform for nodes
-	///-----------------------------------------------------------------------
-
-	void setNodeMatrix(NodeT* const node, const mat4_t& m)
-	{
-		if (node)
-		{
-			auto msize = m.length() * mat4_t::col_type::length();
-			node->matrix.resize(msize);
-			std::copy_n(&m[0][0], msize, node->matrix.begin());
-
-			// reset RST
-			node->rotation.clear();
-			node->scale.clear();
-			node->translation.clear();
-		}
-	}
-
-	//---
-
-	void setNodeRotation(NodeT* const node, const quat_t& q)
-	{
-		if (node)
-		{
-			node->rotation.resize(q.length());
-			std::copy_n(&q.x, q.length(), node->rotation.begin());
-
-			// reset matrix
-			node->matrix.clear();
-		}
-	}
-
-	//---
-
-	void setNodeScale(NodeT* const node, const vec3_t& v)
-	{
-		if (node)
-		{
-			node->scale.resize(v.length());
-			std::copy_n(&v.x, v.length(), node->scale.begin());
-
-			// reset matrix
-			node->matrix.clear();
-		}
-	}
-
-	//---
-
-	void setNodeTranslation(NodeT* const node, const vec3_t& v)
-	{
-		if (node)
-		{
-			node->translation.resize(v.length());
-			std::copy_n(&v.x, v.length(), node->translation.begin());
-
-			// reset matrix
-			node->matrix.clear();
-		}
 	}
 
 	//---

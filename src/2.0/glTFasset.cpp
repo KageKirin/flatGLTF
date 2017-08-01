@@ -23,6 +23,40 @@ namespace glTF_2_0
 		return instance.release();
 	}
 
+	///-----------------------------------------------------------------------
+	/// simple get for unique elements
+	///-----------------------------------------------------------------------
+
+	AssetT* const getAsset(const Document* const doc)
+	{
+		return (doc && doc->root) ? doc->root->asset.get() : nullptr;
+	}
+
+	//---
+
+	SceneT* const getMainScene(const Document* const doc)
+	{
+		return (doc && doc->root) ? getScene(doc, doc->root->scene) : nullptr;
+	}
+
+	//---
+
+	void setMainScene(Document* const doc, SceneT* const scene)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(scene);
+		setMainScene(doc, getId(doc, scene));
+	}
+
+	//---
+
+	void setMainScene(Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_GREATEREQ(id, 0);
+		doc->root->scene = id;
+	}
+
 	//---
 
 	//-------------------------------------------------------------------------
