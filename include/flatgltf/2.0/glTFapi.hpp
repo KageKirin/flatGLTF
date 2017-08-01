@@ -269,28 +269,40 @@ namespace glTF_2_0
 	///-----------------------------------------------------------------------
 	typedef bool (*AccessorQuery_t)(const Document* const, AccessorT* const);
 	std::vector<AccessorT*> queryAccessors(const Document* const, AccessorQuery_t);
+
 	typedef bool (*AnimationQuery_t)(const Document* const, AnimationT* const);
 	std::vector<AnimationT*> queryAnimations(const Document* const, AnimationQuery_t);
+
 	typedef bool (*BufferQuery_t)(const Document* const, BufferT* const);
 	std::vector<BufferT*> queryBuffers(const Document* const, BufferQuery_t);
+
 	typedef bool (*BufferViewQuery_t)(const Document* const, BufferViewT* const);
 	std::vector<BufferViewT*> queryBufferViews(const Document* const, BufferViewQuery_t);
+
 	typedef bool (*CameraQuery_t)(const Document* const, CameraT* const);
 	std::vector<CameraT*> queryCameras(const Document* const, CameraQuery_t);
+
 	typedef bool (*ImageQuery_t)(const Document* const, ImageT* const);
 	std::vector<ImageT*> queryImages(const Document* const, ImageQuery_t);
+
 	typedef bool (*MaterialQuery_t)(const Document* const, MaterialT* const);
 	std::vector<MaterialT*> queryMaterials(const Document* const, MaterialQuery_t);
+
 	typedef bool (*MeshQuery_t)(const Document* const, MeshT* const);
 	std::vector<MeshT*> queryMeshs(const Document* const, MeshQuery_t);
+
 	typedef bool (*NodeQuery_t)(const Document* const, NodeT* const);
 	std::vector<NodeT*> queryNodes(const Document* const, NodeQuery_t);
+
 	typedef bool (*SceneQuery_t)(const Document* const, SceneT* const);
 	std::vector<SceneT*> queryScenes(const Document* const, SceneQuery_t);
+
 	typedef bool (*SamplerQuery_t)(const Document* const, SamplerT* const);
 	std::vector<SamplerT*> querySamplers(const Document* const, SamplerQuery_t);
+
 	typedef bool (*TextureQuery_t)(const Document* const, TextureT* const);
 	std::vector<TextureT*> queryTextures(const Document* const, TextureQuery_t);
+
 	typedef bool (*SkinQuery_t)(const Document* const, SkinT* const);
 	std::vector<SkinT*> querySkins(const Document* const, SkinQuery_t);
 
