@@ -176,8 +176,10 @@ namespace glTF_2_0
 	// all functions return a const-pointer to mutable-object
 	// nullptr if not found
 
-	AssetT* const getAsset(const Document* const);	// has no name
-	SceneT* const getScene(const Document* const);	// return scene if set, nullptr else
+	AssetT* const getAsset(const Document* const);				   // has no name
+	SceneT* const getMainScene(const Document* const);			   // return main scene if set, nullptr else
+	void		  setMainScene(Document* const, SceneT* const);	// set main scene
+	void		  setMainScene(Document* const, glTFid_t);		   // set main scene
 
 	///-----------------------------------------------------------------------
 	/// get-by-id
