@@ -748,17 +748,17 @@ namespace glTF_2_0
 		auto p = fs::path(uri);
 		if (p.extension() == ".glb")
 		{
-			return loadDocument_glb(doc, uri);
+			return loadDocument_glb(doc, uri) && loadDocument_imgdata(doc);
 		}
 
 		if (p.extension() == ".glf")
 		{
-			return loadDocument_glf(doc, uri);
+			return loadDocument_glf(doc, uri) && loadDocument_imgdata(doc);
 		}
 
 		if (p.extension() == ".gltf")
 		{
-			return loadDocument_json(doc, uri) && loadDocument_bindata(doc);
+			return loadDocument_json(doc, uri) && loadDocument_bindata(doc) && loadDocument_imgdata(doc);
 		}
 
 		return false;
@@ -771,17 +771,17 @@ namespace glTF_2_0
 		auto p = fs::path(uri);
 		if (p.extension() == ".glb")
 		{
-			return saveDocument_glb(doc, uri);
+			return saveDocument_glb(doc, uri) && saveDocument_imgdata(doc);
 		}
 
 		if (p.extension() == ".glf")
 		{
-			return saveDocument_glf(doc, uri);
+			return saveDocument_glf(doc, uri) && saveDocument_imgdata(doc);
 		}
 
 		if (p.extension() == ".gltf")
 		{
-			return saveDocument_json(doc, uri) && saveDocument_bindata(doc);
+			return saveDocument_json(doc, uri) && saveDocument_bindata(doc) && saveDocument_imgdata(doc);
 		}
 
 
