@@ -45,8 +45,16 @@ namespace glTF_2_0
 	//! container structure to keep glTF data along with buffers
 	struct Document
 	{
-		Root_t										root;
+		/// json root element for glTF data
+		Root_t root;
+
+		/// binary data mapping filename -> buffer referenced by buffer elements
 		std::map<std::string, std::vector<uint8_t>> bindata;
+
+		/// binary data mapping filename -> buffer referenced by image elements
+		/// NOTE: images can rerefence bufferViews, and thus buffer,
+		/// in which case the image data will be stored in the referenced buffer
+		std::map<std::string, std::vector<uint8_t>> imgdata;
 	};
 
 	///-----------------------------------------------------------------------
