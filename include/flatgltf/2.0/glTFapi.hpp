@@ -156,6 +156,20 @@ namespace glTF_2_0
 	// creates sampler for access
 	TextureT* const createTexture(Document* const, ImageT* const);
 
+	//! create an image referring to a buffer view for data
+	ImageT* const createImage(Document* const, BufferViewT* const, const char* mimeType, const char* name = nullptr);
+
+	//! create an image referring to a uri
+	ImageT* const createImage(Document* const, const char* uri, const char* name);
+
+	//! create an image referring to an external file uri, data kept in imgdata
+	ImageT* const createImage(const std::vector<uint8_t>& data, Document* const, const char* uri, const char* name = nullptr);
+	ImageT* const createImage(const uint8_t* const, size_t length, Document* const, const char* uri, const char* name = nullptr);
+
+	//! create an image referring to a base64 uri created from provided data
+	ImageT* const createImage_embedded(const std::vector<uint8_t>& data, Document* const, const char* mimeType, const char* name = nullptr);
+	ImageT* const createImage_embedded(const uint8_t* const, size_t length, Document* const, const char* mimeType, const char* name = nullptr);
+
 
 	//! create meshprimitive
 	// create meshprimitives and add them to given mesh
