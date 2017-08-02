@@ -659,6 +659,86 @@ namespace glTF_2_0
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 
+	bool loadDocument_imgdata(Document* const doc)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		return std::all_of(doc->root->images.begin(), doc->root->images.end(), [&](auto& img) {
+			if (isDataUri(img->uri.c_str()))
+			{
+				return true;
+			}
+
+			auto imgdata = createImgdata(doc, img->uri.c_str());
+			if (!imgdata)
+			{
+				return false;
+			}
+
+			return loadDocument_imgdata(*imgdata, img->uri.c_str());
+		});
+	}
+
+	//---
+
+	bool saveDocument_imgdata(const Document* const doc)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		return std::all_of(doc->imgdata.begin(), doc->imgdata.end(), [&](auto& bd) {
+			return saveDocument_imgdata(bd.second, bd.first.c_str());
+		});
+	}
+
+	//---
+
+	bool loadDocument_imgdata(std::vector<uint8_t>& imgdata, const char* uri)
+	{
+		if (isDataUri(uri))
+			return true;
+
+		return _load_uri(uri, imgdata);
+	}
+
+	//---
+
+	bool loadDocument_imgdata(std::vector<uint8_t>& imgdata, FILE* file)
+	{
+		return _load_file(file, imgdata);
+	}
+
+	//---
+
+	bool loadDocument_imgdata(std::vector<uint8_t>& imgdata, std::istream& ins)
+	{
+		return _load_stream(ins, imgdata);
+	}
+
+	//---
+
+	bool saveDocument_imgdata(const std::vector<uint8_t>& imgdata, const char* uri)
+	{
+		KHUTILS_ASSERT(!isDataUri(uri));
+		return _save_uri(uri, imgdata);
+	}
+
+	//---
+
+	bool saveDocument_imgdata(const std::vector<uint8_t>& imgdata, FILE* file)
+	{
+		return _save_file(file, imgdata);
+	}
+
+	//---
+
+	bool saveDocument_imgdata(const std::vector<uint8_t>& imgdata, std::ostream& outs)
+	{
+		return _save_stream(outs, imgdata);
+	}
+
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+
 	namespace fs = boost::filesystem;
 
 	bool loadDocument(Document* const doc, const char* uri)

@@ -79,6 +79,20 @@ namespace glTF_2_0
 	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_bindata(std::vector<uint8_t>& buffer, std::istream&);
 	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_bindata(const std::vector<uint8_t>& buffer, std::ostream&);
 
+	// API to fill/dump imgdata from glTF
+	// file interface for external imgdata resources
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(Document*);
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const Document*);
+
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& imgdata, const char* uri);
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& imgdata, const char* uri);
+
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& imgdata, FILE* file);
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& imgdata, FILE* file);
+
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& buffer, std::istream&);
+	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& buffer, std::ostream&);
+
 	// GLB file interface
 	//! saves/loads GLB data
 	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glb(Document* const, const char* uri);
