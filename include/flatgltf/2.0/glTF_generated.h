@@ -272,27 +272,18 @@ namespace glTF_2_0
 	enum class BufferViewTarget : int32_t
 	{
 		ARRAY_BUFFER		 = 34962,
-		ELEMENT_ARRAY_BUFFER = 34963,
-		MIN					 = ARRAY_BUFFER,
-		MAX					 = ELEMENT_ARRAY_BUFFER
+		ELEMENT_ARRAY_BUFFER = 34963	/// originally added for flatgltf
+		,
+		UNIFORM_BUFFER = 35345,
+		MIN			   = ARRAY_BUFFER,
+		MAX			   = UNIFORM_BUFFER
 	};
 
-	inline BufferViewTarget (&EnumValuesBufferViewTarget())[2]
+	inline BufferViewTarget (&EnumValuesBufferViewTarget())[3]
 	{
-		static BufferViewTarget values[] = {BufferViewTarget::ARRAY_BUFFER, BufferViewTarget::ELEMENT_ARRAY_BUFFER};
+		static BufferViewTarget values[]
+		  = {BufferViewTarget::ARRAY_BUFFER, BufferViewTarget::ELEMENT_ARRAY_BUFFER, BufferViewTarget::UNIFORM_BUFFER};
 		return values;
-	}
-
-	inline const char** EnumNamesBufferViewTarget()
-	{
-		static const char* names[] = {"ARRAY_BUFFER", "ELEMENT_ARRAY_BUFFER", nullptr};
-		return names;
-	}
-
-	inline const char* EnumNameBufferViewTarget(BufferViewTarget e)
-	{
-		const size_t index = static_cast<int>(e) - static_cast<int>(BufferViewTarget::ARRAY_BUFFER);
-		return EnumNamesBufferViewTarget()[index];
 	}
 
 	///-- camera.perspective.schema.json --/
