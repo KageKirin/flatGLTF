@@ -27,6 +27,7 @@ project "flatgltf_common"
 		khutils_includedirs,
 		bandit_includedirs,
 		boost_includedirs,
+		glew_includedirs,
 	}
 
 	defines {
@@ -61,6 +62,7 @@ project "flatgltf_2_0"
 		khutils_includedirs,
 		bandit_includedirs,
 		boost_includedirs,
+		glew_includedirs,
 	}
 
 	defines {
