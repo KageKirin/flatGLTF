@@ -351,6 +351,9 @@ table Buffer {
 enum BufferViewTarget: int {
 	ARRAY_BUFFER = 34962,
 	ELEMENT_ARRAY_BUFFER = 34963,
+
+	/// originally added for flatgltf
+	UNIFORM_BUFFER = 35345,
 }
 
 /// Buffer View
@@ -376,7 +379,7 @@ table BufferView {
             
 	/// "description": "The target that the GPU buffer should be bound to."
 	/// "gltf_webgl": "`bindBuffer()`"     
-    target: int = -1; // BufferViewTarget = ARRAY_BUFFER;
+    target: int = -1; // BufferViewTarget = UNIFORM_BUFFER;
 
 	///-- glTFChildOfRootProperty
 	/// The user-defined name of this object.
