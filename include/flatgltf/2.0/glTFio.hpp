@@ -5,6 +5,7 @@
 #include "flatgltf/2.0/glTFapi.hpp"
 #include "flatgltf/2.0/glTFmath_types.hpp"
 #include "flatgltf/common/glTFapiexports.h"
+#include "flatgltf/common/glTFutils.hpp"
 
 #include <cctype>
 #include <cstdio>
@@ -46,80 +47,64 @@ namespace glTF_2_0
 	/// file I/O
 	///-----------------------------------------------------------------------
 
-	// document file interface
-	//! saves/loads document + bindata attachments
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument(Document* const, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument(const Document* const, const char* uri);
+	bool loadDocument(Document* const, const char* location);
+	bool saveDocument(const Document* const, const char* location);
 
-	// JSON file interface
-	//! saves/loads document JSON part
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_json(Document* const, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_json(const Document* const, const char* uri);
+	// requried IO funcs
+	// - read/write JSON (only)
+	// - read/write JSON + external
+	// - read/write GLF (only)
+	// - read/write GLF + external
+	// - read/write GLB (only)
+	// - read/write GLB + external (images)
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_json(Document* const, FILE* file);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_json(const Document* const, FILE* file);
+	typedef bool (*data_writer_t)(const char* location, const std::vector<uint8_t>&);
+	typedef bool (*data_reader_t)(const char* location, std::vector<uint8_t>&);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_json(Document* const, std::istream&);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_json(const Document* const, std::ostream&);
+	// load document as-is, without modification or external data
+	bool loadDocument_json(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_glf(Document* const, const char* location, data_reader_t = &glTF_common::readData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_json(Document* const, const std::vector<uint8_t>& buffer);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_json(const Document* const, std::vector<uint8_t>& buffer);
+	// load document: transform data uris to buffers, load external resources
+	bool loadDocument_json_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_glf_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
 
-	// API to fill/dump bindata from glTF
-	// file interface for external bindata resources
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_bindata(Document*);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_bindata(const Document*);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_bindata(std::vector<uint8_t>& bindata, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_bindata(const std::vector<uint8_t>& bindata, const char* uri);
+	// write document as-is, without modification or external data
+	bool saveDocument_json(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glf(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_bindata(std::vector<uint8_t>& bindata, FILE* file);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_bindata(const std::vector<uint8_t>& bindata, FILE* file);
+	// write document as-is, write buffers and images set to external URIs
+	bool saveDocument_json_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glf_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_bindata(std::vector<uint8_t>& buffer, std::istream&);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_bindata(const std::vector<uint8_t>& buffer, std::ostream&);
+	// write document: ALL buffers/images will be embedded base64 URIs
+	bool saveDocument_json_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glf_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	// API to fill/dump imgdata from glTF
-	// file interface for external imgdata resources
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(Document*);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const Document*);
+	// write document: ALL buffers/images will be external files named after URI or name or counter
+	bool saveDocument_json_external(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glf_external(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& imgdata, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& imgdata, const char* uri);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& imgdata, FILE* file);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& imgdata, FILE* file);
+	// write document to glTF-binary: all buffers merged into 1, without external data
+	bool saveDocument_glb(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_imgdata(std::vector<uint8_t>& buffer, std::istream&);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_imgdata(const std::vector<uint8_t>& buffer, std::ostream&);
+	// write document to glTF-binary: all buffers merged into 1, ALL external images will be embedded base64 URIs
+	bool saveDocument_glb_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	// GLB file interface
-	//! saves/loads GLB data
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glb(Document* const, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glb(const Document* const, const char* uri);
+	// write document to glTF-binary: all buffers merged into 1, ALL external images also transformed to use bufferView
+	bool saveDocument_glb_buffer(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glb(Document* const, FILE* file);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glb(const Document* const, FILE* file);
+	// write document to glTF-binary: all buffers merged into 1, with external data
+	bool saveDocument_glb_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glb(Document* const, std::istream&);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glb(const Document* const, std::ostream&);
 
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glb(Document* const, const std::vector<uint8_t>& buffer);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glb(const Document* const, std::vector<uint8_t>& buffer);
+	// load document from glTF-binary: all buffers merged into 1, without external data
+	bool loadDocument_glb(Document* const, const char* location, data_reader_t = &glTF_common::readData);
 
-	// GLF file interface
-	//! GLF is a FlatGLTF original format, basically JSON dumped as flatbuffer
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glf(Document* const, const char* uri);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glf(const Document* const, const char* uri);
-
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glf(Document* const, FILE* file);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glf(const Document* const, FILE* file);
-
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glf(Document* const, std::istream&);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glf(const Document* const, std::ostream&);
-
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API loadDocument_glf(Document* const, const std::vector<uint8_t>& buffer);
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API saveDocument_glf(const Document* const, std::vector<uint8_t>& buffer);
+	// load document from glTF-binary: all buffers merged into 1, with external data
+	bool loadDocument_glb_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
 
 	///-----------------------------------------------------------------------
 

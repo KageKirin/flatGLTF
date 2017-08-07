@@ -48,14 +48,22 @@ namespace glTF_2_0
 		/// json root element for glTF data
 		Root_t root;
 
-		/// binary data mapping filename -> buffer referenced by buffer elements
-		std::map<std::string, std::vector<uint8_t>> bindata;
+		/// binary data mapping buffer -> data referenced by buffer elements
+		std::map<BufferT* const, std::vector<uint8_t>> bindata;
 
-		/// binary data mapping filename -> buffer referenced by image elements
+		/// binary data mapping image -> image data referenced by image elements
 		/// NOTE: images can rerefence bufferViews, and thus buffer,
 		/// in which case the image data will be stored in the referenced buffer
-		std::map<std::string, std::vector<uint8_t>> imgdata;
+		std::map<ImageT* const, std::vector<uint8_t>> imgdata;
 	};
+
+	std::unique_ptr<Document, decltype(&destroyDocument)> createDocumentPtr(const std::string& name);
+
+	// creates new bindata
+	std::vector<uint8_t>& createBufferData(Document* const, BufferT* const);
+
+	// creates new imgdata
+	std::vector<uint8_t>& createImageData(Document* const, ImageT* const);
 
 	///-----------------------------------------------------------------------
 
@@ -68,6 +76,16 @@ namespace glTF_2_0
 	std::vector<uint8_t> to_flatbuffer(const Root_t&);
 	//! flatbuffer-deserialize glTF object from buffer
 	Root_t from_flatbuffer_internal(const std::vector<uint8_t>&);
+
+	///-----------------------------------------------------------------------
+
+	Root_t cloneRoot(const Root_t& orig);
+
+	Root_t embedDocumentImages(const Document* const);
+	Root_t embedDocumentBuffersAndImages(const Document* const);
+
+	std::tuple<Root_t, std::vector<uint8_t>> binarizeDocumentBuffers(const Document* const _doc, bool withImages);
+	std::tuple<Root_t, std::vector<uint8_t>> binarizeDocumentBuffers_embedImages(const Document* const _doc, bool withImages);
 
 	///-----------------------------------------------------------------------
 	///-----------------------------------------------------------------------
