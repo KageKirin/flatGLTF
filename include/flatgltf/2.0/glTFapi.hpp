@@ -277,6 +277,25 @@ namespace glTF_2_0
 
 
 	///-----------------------------------------------------------------------
+	/// validate-id
+	///-----------------------------------------------------------------------
+	// all functions return true if id is valid for this document and type
+	bool isValidAccessorId(const Document* const, glTFid_t);
+	bool isValidAnimationId(const Document* const, glTFid_t);
+	bool isValidBufferId(const Document* const, glTFid_t);
+	bool isValidBufferViewId(const Document* const, glTFid_t);
+	bool isValidCameraId(const Document* const, glTFid_t);
+	bool isValidImageId(const Document* const, glTFid_t);
+	bool isValidMaterialId(const Document* const, glTFid_t);
+	bool isValidMeshId(const Document* const, glTFid_t);
+	bool isValidNodeId(const Document* const, glTFid_t);
+	bool isValidSceneId(const Document* const, glTFid_t);
+	bool isValidSamplerId(const Document* const, glTFid_t);
+	bool isValidTextureId(const Document* const, glTFid_t);
+	bool isValidSkinId(const Document* const, glTFid_t);
+
+
+	///-----------------------------------------------------------------------
 	/// query
 	/// returns vector of elements that matched query
 	///-----------------------------------------------------------------------

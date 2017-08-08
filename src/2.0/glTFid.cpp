@@ -291,6 +291,115 @@ namespace glTF_2_0
 
 	//---
 
+	///-----------------------------------------------------------------------
+	/// validate-id
+	///-----------------------------------------------------------------------
+	// all functions return true if id is valid for this document and type
+
+	bool isValidAccessorId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->accessors.size());
+	}
+
+	//---
+
+	bool isValidAnimationId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->animations.size());
+	}
+
+	//---
+
+	bool isValidBufferId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->buffers.size());
+	}
+
+	//---
+
+	bool isValidBufferViewId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->bufferViews.size());
+	}
+
+	//---
+
+	bool isValidCameraId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->cameras.size());
+	}
+
+	//---
+
+	bool isValidImageId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->images.size());
+	}
+
+	//---
+
+	bool isValidMaterialId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->materials.size());
+	}
+
+	//---
+
+	bool isValidMeshId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->meshes.size());
+	}
+
+	//---
+
+	bool isValidNodeId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->nodes.size());
+	}
+
+	//---
+
+	bool isValidSceneId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->scenes.size());
+	}
+
+	//---
+
+	bool isValidSamplerId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->samplers.size());
+	}
+
+	//---
+
+	bool isValidTextureId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->textures.size());
+	}
+
+	//---
+
+	bool isValidSkinId(const Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		return (id >= 0) && (id < (glTFid_t)doc->root->skins.size());
+	}
+
+	//---
+
 
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
