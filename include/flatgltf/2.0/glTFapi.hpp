@@ -30,30 +30,6 @@ namespace glTF_2_0
 	Document* const createDocument(const char* name);
 	void			destroyDocument(Document* const);
 
-	// returns buffer data if buffer exists
-	std::vector<uint8_t>& getBufferData(Document* const, BufferT* const);
-	std::vector<uint8_t>  getBufferData(const Document* const, const BufferT* const);
-
-	// sets buffer data, overwriting existing
-	// returns new size
-	// returns 0 if: buffer does not exist
-	size_t setBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
-	size_t setBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
-
-	// appends buffer data to existing buffer data
-	// returns new size
-	// returns 0 if: buffer does not exist
-	size_t appendBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
-	size_t appendBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
-
-	// appends data to buffer
-	// if data uri, decode base64, add data, encode base64 will happen
-	size_t setBufferViewData(const std::vector<uint8_t>&, Document* const, BufferViewT* const);
-	size_t setBufferViewData(const uint8_t* const, size_t length, Document* const, BufferViewT* const);
-
-	// returns COPY of data pointed to by bufferView
-	std::vector<uint8_t> getBufferViewData(const Document* const, const BufferViewT* const);
-
 	///-----------------------------------------------------------------------
 	/// instantiation
 	///-----------------------------------------------------------------------
@@ -183,22 +159,6 @@ namespace glTF_2_0
 	ImageT* const createImage(const std::vector<uint8_t>& data, Document* const, const char* uri, const char* name = nullptr);
 	ImageT* const createImage(const uint8_t* const, size_t length, Document* const, const char* uri, const char* name = nullptr);
 
-	// returns image data if image exists
-	std::vector<uint8_t>& getImageData(Document* const, ImageT* const);
-	std::vector<uint8_t>  getImageData(const Document* const, const ImageT* const);
-
-	// sets image data, overwriting existing
-	// returns new size
-	// returns 0 if: buffer does not exist
-	size_t setImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
-	size_t setImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
-
-	// appends image data to existing image data
-	// returns new size
-	// returns 0 if: image does not exis
-	size_t appendImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
-	size_t appendImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
-
 	//! create meshprimitive
 	// create meshprimitives and add them to given mesh
 	MeshPrimitiveT* const createMeshPrimitive(Document* const, MeshT* const, AccessorT* const, MaterialT* const = nullptr);
@@ -211,6 +171,53 @@ namespace glTF_2_0
 
 	//! create skin node
 	NodeT* const createNode(Document* const, SkinT* const);
+
+
+	///-----------------------------------------------------------------------
+	/// buffer data getter setter
+	///-----------------------------------------------------------------------
+
+	// returns COPY of buffer data if buffer exists, empty vector elese
+	std::vector<uint8_t> getBufferData(const Document* const, const BufferT* const);
+
+	// sets buffer data, overwriting existing
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t setBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
+	size_t setBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
+
+	// appends buffer data to existing buffer data
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t appendBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
+	size_t appendBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
+
+	// appends data to buffer
+	// if data uri, decode base64, add data, encode base64 will happen
+	size_t setBufferViewData(const std::vector<uint8_t>&, Document* const, BufferViewT* const);
+	size_t setBufferViewData(const uint8_t* const, size_t length, Document* const, BufferViewT* const);
+
+	// returns COPY of data pointed to by bufferView
+	std::vector<uint8_t> getBufferViewData(const Document* const, const BufferViewT* const);
+
+	///-----------------------------------------------------------------------
+	/// image data getter setter
+	///-----------------------------------------------------------------------
+
+	// returns COPY of image data if image exists, empty vector else
+	std::vector<uint8_t> getImageData(const Document* const, const ImageT* const);
+
+	// sets image data, overwriting existing
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t setImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
+	size_t setImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
+
+	// appends image data to existing image data
+	// returns new size
+	// returns 0 if: image does not exis
+	size_t appendImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
+	size_t appendImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
 
 	///-----------------------------------------------------------------------
 	/// simple get for unique elements

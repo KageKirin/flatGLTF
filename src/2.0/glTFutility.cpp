@@ -172,7 +172,7 @@ namespace glTF_2_0
 					continue;
 
 				// create new bufferviews for image
-				auto& imgdata = getImageData(doc.get(), img.get());
+				auto imgdata = getImageData(doc.get(), img.get());
 				KHUTILS_ASSERT_CNTR_NOT_EMPTY(imgdata);
 
 				auto view = createBufferView(imgdata, doc.get(), buf, (img->name + "_buffer").c_str());

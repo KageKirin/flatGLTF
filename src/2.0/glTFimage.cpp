@@ -138,7 +138,7 @@ namespace glTF_2_0
 
 	//---
 
-	std::vector<uint8_t>& getImageData(Document* const doc, ImageT* const img)
+	std::vector<uint8_t> getImageData(const Document* const doc, const ImageT* const img)
 	{
 		KHUTILS_ASSERT_PTR(doc);
 		KHUTILS_ASSERT_PTR(img);
@@ -146,10 +146,10 @@ namespace glTF_2_0
 		auto id = getId(doc, img);
 		KHUTILS_ASSERT(isValidImageId(doc, id));
 
-		// TODO: handle case of bufferView-stored data
-		// --> has side effects due to next functions
-		// --> currently, we cannot get/modify this data, hence assert below
-		KHUTILS_ASSERT(!isValidBufferViewId(doc, img->bufferView));
+		if (isValidBufferViewId(doc, img->bufferView))
+		{
+			return getBufferViewData(doc, getBufferView(doc, img->bufferView));
+		}
 
 		auto it = std::find_if(doc->imgdata.begin(), doc->imgdata.end(), [&](auto& bdp) { return bdp.first == img; });
 		KHUTILS_ASSERT_NOT(it, doc->imgdata.end());
@@ -178,11 +178,15 @@ namespace glTF_2_0
 		auto id = getId(doc, img);
 		if (isValidImageId(doc, id))
 		{
-			auto imgdata = getImageData(doc, img);
-			imgdata.clear();
+			if (isValidBufferViewId(doc, img->bufferView))
+			{
+				return setBufferViewData(data, length, doc, getBufferView(doc, img->bufferView));
+			}
+
+			auto& imgdata = doc->imgdata[img];
 			imgdata.reserve(length);
-			std::copy_n(data, length, std::back_inserter(imgdata));
-			return getImageData(doc, img).size();
+			imgdata.assign(data, data + length);
+			return imgdata.size();
 		}
 
 		return 0;
@@ -209,10 +213,11 @@ namespace glTF_2_0
 		auto id = getId(doc, img);
 		if (isValidImageId(doc, id))
 		{
-			auto imgdata = getImageData(doc, img);
+			auto imgdata = getImageData(doc, img);	// expensive, but safe
 			imgdata.reserve(imgdata.size() + length);
 			std::copy_n(data, length, std::back_inserter(imgdata));
-			return getImageData(doc, img).size();
+
+			return setImageData(imgdata, doc, img);
 		}
 
 		return 0;

@@ -65,7 +65,7 @@ namespace glTF_2_0
 
 	//---
 
-	std::vector<uint8_t>& getBufferData(Document* const doc, BufferT* const buf)
+	std::vector<uint8_t> getBufferData(const Document* const doc, const BufferT* const buf)
 	{
 		KHUTILS_ASSERT_PTR(doc);
 		KHUTILS_ASSERT_PTR(buf);
@@ -100,11 +100,12 @@ namespace glTF_2_0
 		auto id = getId(doc, buf);
 		if (isValidBufferId(doc, id))
 		{
-			auto bufdata = getBufferData(doc, buf);
-			bufdata.clear();
+			auto& bufdata = doc->bindata[buf];
 			bufdata.reserve(length);
-			std::copy_n(data, length, std::back_inserter(bufdata));
-			return getBufferData(doc, buf).size();
+			bufdata.assign(data, data + length);
+
+			buf->byteLength = bufdata.size();
+			return bufdata.size();
 		}
 
 		return 0;
@@ -131,10 +132,12 @@ namespace glTF_2_0
 		auto id = getId(doc, buf);
 		if (isValidBufferId(doc, id))
 		{
-			auto bufdata = getBufferData(doc, buf);
+			auto& bufdata = doc->bindata[buf];
 			bufdata.reserve(bufdata.size() + length);
 			std::copy_n(data, length, std::back_inserter(bufdata));
-			return getBufferData(doc, buf).size();
+
+			buf->byteLength = bufdata.size();
+			return bufdata.size();
 		}
 
 		return 0;
