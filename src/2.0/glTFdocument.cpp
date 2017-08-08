@@ -39,7 +39,7 @@ namespace glTF_2_0
 
 	// document creation
 
-	std::unique_ptr<Document, decltype(&destroyDocument)> createDocument(const std::string& name)
+	std::unique_ptr<Document, decltype(&destroyDocument)> createDocumentPtr(const std::string& name)
 	{
 		return std::unique_ptr<Document, decltype(&destroyDocument)>{createDocument(name.c_str()), &destroyDocument};
 	}
