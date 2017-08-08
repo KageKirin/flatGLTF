@@ -228,7 +228,7 @@ namespace glTF_2_0
 	bool loadDocument_json(Document* const doc, const char* location, data_reader_t reader)
 	{
 		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(reader);
+		// KHUTILS_ASSERT_PTR(reader);
 
 		std::vector<uint8_t> buffer;
 		auto				 readOk = reader(location, buffer);
@@ -388,7 +388,7 @@ namespace glTF_2_0
 	bool saveDocument_json(const Document* const doc, const char* location, data_writer_t writer)
 	{
 		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(writer);
+		// KHUTILS_ASSERT_PTR(writer);
 
 		auto jsonString = to_json(doc->root);
 		KHUTILS_ASSERT_CNTR_NOT_EMPTY(jsonString);
@@ -407,7 +407,7 @@ namespace glTF_2_0
 	bool saveDocument_glf(const Document* const doc, const char* location, data_writer_t writer)
 	{
 		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(writer);
+		// KHUTILS_ASSERT_PTR(writer);
 
 		auto buffer = to_flatbuffer(doc->root);
 		KHUTILS_ASSERT_CNTR_NOT_EMPTY(buffer);
@@ -483,7 +483,7 @@ namespace glTF_2_0
 	bool saveDocument_json_embed(const Document* const doc, const char* location, data_writer_t writer)
 	{
 		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(writer);
+		// KHUTILS_ASSERT_PTR(writer);
 
 		auto embeddedRoot = embedDocumentBuffersAndImages(doc);
 		KHUTILS_ASSERT_PTR(embeddedRoot);
@@ -505,7 +505,7 @@ namespace glTF_2_0
 	bool saveDocument_glf_embed(const Document* const doc, const char* location, data_writer_t writer)
 	{
 		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(writer);
+		// KHUTILS_ASSERT_PTR(writer);
 
 		auto embeddedRoot = embedDocumentBuffersAndImages(doc);
 		KHUTILS_ASSERT_PTR(embeddedRoot);

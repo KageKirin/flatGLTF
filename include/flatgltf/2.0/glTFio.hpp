@@ -9,6 +9,7 @@
 
 #include <cctype>
 #include <cstdio>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
@@ -37,53 +38,55 @@ namespace glTF_2_0
 	// - read/write GLB (only)
 	// - read/write GLB + external (images)
 
-	typedef bool (*data_writer_t)(const char* location, const std::vector<uint8_t>&);
-	typedef bool (*data_reader_t)(const char* location, std::vector<uint8_t>&);
+	// typedef bool (*data_writer_t)(const char* location, const std::vector<uint8_t>&);
+	using data_writer_t = std::function<bool(const char* location, const std::vector<uint8_t>&)>;
+	// typedef bool (*data_reader_t)(const char* location, std::vector<uint8_t>&);
+	using data_reader_t = std::function<bool(const char* location, std::vector<uint8_t>&)>;
 
 	// load document as-is, without modification or external data
-	bool loadDocument_json(Document* const, const char* location, data_reader_t = &glTF_common::readData);
-	bool loadDocument_glf(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_json(Document* const, const char* location, data_reader_t = glTF_common::readData);
+	bool loadDocument_glf(Document* const, const char* location, data_reader_t = glTF_common::readData);
 
 	// load document: transform data uris to buffers, load external resources
-	bool loadDocument_json_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
-	bool loadDocument_glf_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_json_plus(Document* const, const char* location, data_reader_t = glTF_common::readData);
+	bool loadDocument_glf_plus(Document* const, const char* location, data_reader_t = glTF_common::readData);
 
 
 	// write document as-is, without modification or external data
-	bool saveDocument_json(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
-	bool saveDocument_glf(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_json(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
+	bool saveDocument_glf(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document as-is, write buffers and images set to external URIs
-	bool saveDocument_json_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
-	bool saveDocument_glf_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_json_plus(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
+	bool saveDocument_glf_plus(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document: ALL buffers/images will be embedded base64 URIs
-	bool saveDocument_json_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
-	bool saveDocument_glf_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_json_embed(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
+	bool saveDocument_glf_embed(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document: ALL buffers/images will be external files named after URI or name or counter
-	bool saveDocument_json_external(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
-	bool saveDocument_glf_external(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_json_external(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
+	bool saveDocument_glf_external(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 
 	// write document to glTF-binary: all buffers merged into 1, without external data
-	bool saveDocument_glb(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glb(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document to glTF-binary: all buffers merged into 1, ALL external images will be embedded base64 URIs
-	bool saveDocument_glb_embed(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glb_embed(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document to glTF-binary: all buffers merged into 1, ALL external images also transformed to use bufferView
-	bool saveDocument_glb_buffer(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glb_buffer(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 	// write document to glTF-binary: all buffers merged into 1, with external data
-	bool saveDocument_glb_plus(const Document* const, const char* location, data_writer_t = &glTF_common::writeData);
+	bool saveDocument_glb_plus(const Document* const, const char* location, data_writer_t = glTF_common::writeData);
 
 
 	// load document from glTF-binary: all buffers merged into 1, without external data
-	bool loadDocument_glb(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_glb(Document* const, const char* location, data_reader_t = glTF_common::readData);
 
 	// load document from glTF-binary: all buffers merged into 1, with external data
-	bool loadDocument_glb_plus(Document* const, const char* location, data_reader_t = &glTF_common::readData);
+	bool loadDocument_glb_plus(Document* const, const char* location, data_reader_t = glTF_common::readData);
 
 	///-----------------------------------------------------------------------
 
