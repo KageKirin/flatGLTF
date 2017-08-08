@@ -22,27 +22,6 @@ namespace glTF_2_0
 	/// clone a document into a new one
 	FLATGLTF_DLL_FUNC bool FLATGLTF_API cloneDocument(const Document* const source, Document* const target);
 
-	/// prepares glTF data for GLB serialization
-	//- changes URIs
-	//- merges all mapped bindata into a single blob
-	//- changes bufferViews accordingly
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API binarizeDocument(Document* const);
-
-	/// prepares glTF data for glTF-embedded format
-	//- changes URIs to contain base64 encoded buffers
-	//- changes bufferViews accordingly
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API embedDocument(Document* const);
-
-	/// prepares glTF data for glTF-multi format
-	//- changes URIs to reference external buffers
-	//- changes bufferViews accordingly
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API dislodgeDocument(Document* const);
-
-	/// prepares glTF data for glTF-multi format
-	//- splits buffers into multiple buffers according to bufferViews
-	//- changes bufferViews accordingly
-	FLATGLTF_DLL_FUNC bool FLATGLTF_API splitDocument(Document* const);
-
 	///-----------------------------------------------------------------------
 	/// file I/O
 	///-----------------------------------------------------------------------

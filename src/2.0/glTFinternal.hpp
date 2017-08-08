@@ -87,6 +87,28 @@ namespace glTF_2_0
 	std::tuple<Root_t, std::vector<uint8_t>> binarizeDocumentBuffers(const Document* const _doc, bool withImages);
 	std::tuple<Root_t, std::vector<uint8_t>> binarizeDocumentBuffers_embedImages(const Document* const _doc, bool withImages);
 
+
+	/// prepares glTF data for GLB serialization
+	//- changes URIs
+	//- merges all mapped bindata into a single blob
+	//- changes bufferViews accordingly
+	bool binarizeDocument(Document* const);
+
+	/// prepares glTF data for glTF-embedded format
+	//- changes URIs to contain base64 encoded buffers
+	//- changes bufferViews accordingly
+	bool embedDocument(Document* const);
+
+	/// prepares glTF data for glTF-multi format
+	//- changes URIs to reference external buffers
+	//- changes bufferViews accordingly
+	bool dislodgeDocument(Document* const);
+
+	/// prepares glTF data for glTF-multi format
+	//- splits buffers into multiple buffers according to bufferViews
+	//- changes bufferViews accordingly
+	bool splitDocument(Document* const);
+
 	///-----------------------------------------------------------------------
 	///-----------------------------------------------------------------------
 
