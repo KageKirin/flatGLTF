@@ -17,7 +17,7 @@ namespace glTF_common
 	/// Base64 tools
 	///-----------------------------------------------------------------------
 
-	static constexpr char* reDataUri = R"(/^data:(.*?)(;base64)?,(.*)$/;)";
+	static constexpr char reDataUri[] = R"(/^data:(.*?)(;base64)?,(.*)$/;)";
 
 	bool isDataUri(const char* uri)
 	{
@@ -44,6 +44,8 @@ namespace glTF_common
 		return std::string();
 	}
 
+	// get mime type from data uri
+	// returns empty string if not set
 	std::string getMimeType(const char* uri)
 	{
 		return getUriPart(uri, 1);
@@ -54,11 +56,38 @@ namespace glTF_common
 		return getMimeType(uri.c_str());
 	}
 
+	// get base64 part from data uri
+	// returns empty string if not set
+	std::string getUriBase64(const char* uri)
+	{
+		return getUriPart(uri, 2);
+	}
+
+	std::string getUriBase64(const std::string& uri)
+	{
+		return getUriBase64(uri.c_str());
+	}
+
 	//---
 
+	// set base64 part of data uri
+	// returns complete string
+	std::string setUriBase64(const char* uri, const char* base64)
+	{
+		return std::string(uri) + "," + base64;
+	}
+
+	std::string setUriBase64(const std::string& uri, const std::string& base64)
+	{
+		return setUriBase64(uri.c_str(), base64.c_str());
+	}
+
+	//---
+
+	// converts data uri to contained data
 	std::vector<uint8_t> convertUriToData(const char* uri)
 	{
-		return decodeBase64(getUriPart(uri, 2));
+		return decodeBase64(getUriBase64(uri));
 	}
 
 	std::vector<uint8_t> convertUriToData(const std::string& uri)
@@ -68,6 +97,8 @@ namespace glTF_common
 
 	//---
 
+	// converts data to data uri following optional mimetype
+	// returns complete data uri string
 	std::string convertDataToUri(const uint8_t* const data, size_t length, const char* mimeType)
 	{
 		// data:application/octet-stream;base64,<data>
@@ -81,55 +112,24 @@ namespace glTF_common
 
 
 	//---
-
 	static const std::string base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	std::vector<uint8_t> decodeBase64(const char* base64)
+	// converts base64 string to contained data
+	// NOTE: only base64 string, NOT data uri
+
+	std::vector<uint8_t> decodeBase64(const char* encoded)
 	{
+		return decodeBase64(std::string(encoded));
 	}
 
-	std::vector<uint8_t> decodeBase64(const std::string& base64)
-	{
-		return decodeBase64(base64.c_str());
-	}
-
-	//---
-
-	std::string encodeBase64(const uint8_t* const data, size_t size)
-	{
-	}
-
-	std::string encodeBase64(const std::vector<uint8_t>& data)
-	{
-		return encodeBase64(data.data(), data.size());
-	}
-
-	///-----------------------------------------------------------------------
-	///-----------------------------------------------------------------------
-
-}	// namespace glTF_common
-
-#if 0
-namespace vkts
-{
-
-	static const std::string base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-	std::vector<uint8_t> VKTS_APIENTRY base64Decode(const std::string& encoded)
+	std::vector<uint8_t> decodeBase64(const std::string& encoded)
 	{
 		std::vector<uint8_t> decoded;
-
-		//
-		size_t encodedIndex = 0;
-
+		size_t				 encodedIndex = 0;
 		while (encodedIndex < encoded.size())
 		{
-			uint8_t out[3] = {0, 0, 0};
-
-			//
-
-			size_t gathered = 0;
-
+			uint8_t out[3]   = {0, 0, 0};
+			size_t  gathered = 0;
 			for (gathered = 0; gathered < 4; gathered++)
 			{
 				// Check, if out of bounds. If yes, invalid encoded.
@@ -190,27 +190,26 @@ namespace vkts
 			}
 		}
 
-		//
-
 		return decoded;
 	}
 
-	std::string VKTS_APIENTRY base64Encode(const std::vector<uint8_t> data)
+	//---
+	// converts data to base64 string
+	// NOTE: only base64 string, NOT data uri
+
+	std::string encodeBase64(const uint8_t* const data, size_t size)
 	{
-		std::string encoded = "";
+		return encodeBase64(std::vector<uint8_t>(data, data + size));
+	}
 
-		//
-
-		size_t dataIndex = 0;
-
+	std::string encodeBase64(const std::vector<uint8_t>& data)
+	{
+		std::string encoded   = "";
+		size_t		dataIndex = 0;
 		while (dataIndex < data.size())
 		{
-			uint8_t in[3] = {0, 0, 0};
-
-			//
-
-			size_t gathered = 0;
-
+			uint8_t in[3]	= {0, 0, 0};
+			size_t  gathered = 0;
 			for (gathered = 0; gathered < 3; gathered++)
 			{
 				if (dataIndex == data.size())
@@ -260,5 +259,8 @@ namespace vkts
 
 		return encoded;
 	}
-}
-#endif
+
+	///-----------------------------------------------------------------------
+	///-----------------------------------------------------------------------
+
+}	// namespace glTF_common
