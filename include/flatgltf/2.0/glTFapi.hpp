@@ -31,13 +31,26 @@ namespace glTF_2_0
 	void				  destroyDocument(Document* const);
 	std::vector<uint8_t>& createBindata(Document* const, const char* name);
 
-	std::vector<uint8_t>& getBindata(Document* const, const char* name);
-	size_t				  setBindata(const std::vector<uint8_t>&, Document* const, const char* name);
-	size_t				  addBindata(const std::vector<uint8_t>&, Document* const, const char* name);
+	// returns buffer data if buffer exists
+	std::vector<uint8_t>& getBufferData(Document* const, BufferT* const);
+	std::vector<uint8_t>  getBufferData(const Document* const, const BufferT* const);
 
+	// sets buffer data, overwriting existing
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t setBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
+	size_t setBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
 
-	size_t addBufferData(const uint8_t* const data, size_t length, Document* const, BufferT* const);
-	size_t setBufferViewData(const uint8_t* const data, size_t length, Document* const, BufferViewT* const);
+	// appends buffer data to existing buffer data
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t appendBufferData(const std::vector<uint8_t>&, Document* const, BufferT* const);
+	size_t appendBufferData(const uint8_t* const, size_t length, Document* const, BufferT* const);
+
+	// appends data to buffer
+	// if data uri, decode base64, add data, encode base64 will happen
+	size_t setBufferViewData(const std::vector<uint8_t>&, Document* const, BufferViewT* const);
+	size_t setBufferViewData(const uint8_t* const, size_t length, Document* const, BufferViewT* const);
 
 
 	///-----------------------------------------------------------------------

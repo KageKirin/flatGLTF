@@ -25,13 +25,12 @@ namespace glTF_2_0
 			instance->name = name;
 		}
 		doc->root->buffers.push_back(std::move(instance));
+		createBufferData(doc, instance.get()).clear();
 		return doc->root->buffers.back().get();
 	}
 
 	//---
 
-	//! create buffer
-	// if name is null, data will be internal
 	BufferT* const createBuffer(Document* const doc, const char* uri, const char* name)
 	{
 		KHUTILS_ASSERT_PTR(doc);
@@ -40,9 +39,10 @@ namespace glTF_2_0
 		auto buffer = createBuffer(doc, name);
 		buffer->uri = uri;
 
-		if (!isDataUri(uri))
+		if (isDataUri(buffer->uri))
 		{
-			createBindata(doc, uri);
+			setBufferData(convertUriToData(uri), doc, buffer);
+			buffer->uri = setUriBase64(uri, "");	// remove data, as its decoded in buffer now
 		}
 
 		return buffer;
@@ -50,61 +50,97 @@ namespace glTF_2_0
 
 	//---
 
-	std::vector<uint8_t>& createBindata(Document* const doc, const char* name)
-	{
-		KHUTILS_ASSERT_PTR(doc);
-		return getBindata(doc, name);
-	}
-
-	//---
-
-	size_t addBufferData(const uint8_t* const data, size_t length, Document* const doc, BufferT* const buf)
-	{
-		KHUTILS_ASSERT_PTR(data);
-		KHUTILS_ASSERT_PTR(doc);
-		KHUTILS_ASSERT_PTR(buf);
-
-		if (isDataUri(buf->uri))
-		{
-			auto bufData = convertUriToData(buf->uri);
-			std::copy_n(data, length, std::back_inserter(bufData));
-			buf->uri		= convertDataToUri(bufData);
-			buf->byteLength = bufData.size();
-		}
-		else
-		{
-			auto& bufData = getBindata(doc, buf->uri.c_str());
-			std::copy_n(data, length, std::back_inserter(bufData));
-			buf->byteLength = bufData.size();
-		}
-		return buf->byteLength;
-	}
-
-
 	///-----------------------------------------------------------------------
 	/// bindata
 	///-----------------------------------------------------------------------
 
-	std::vector<uint8_t>& getBindata(Document* const doc, const char* name)
+	std::vector<uint8_t>& createBufferData(Document* const doc, BufferT* const buf)
 	{
-		return doc->bindata[name];
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(buf);
+
+		doc->bindata[buf].clear();
+		return doc->bindata[buf];
 	}
 
-	size_t setBindata(const std::vector<uint8_t>& data, Document* const doc, const char* name)
+	//---
+
+	std::vector<uint8_t>& getBufferData(Document* const doc, BufferT* const buf)
 	{
-		doc->bindata[name].clear();
-		doc->bindata[name].reserve(data.size());
-		std::copy(data.begin(), data.end(), std::back_inserter(doc->bindata[name]));
-		return doc->bindata[name].size();
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(buf);
+
+		auto id = getId(doc, buf);
+		KHUTILS_ASSERT(isValidBufferId(doc, id));
+
+		auto it = std::find_if(doc->bindata.begin(), doc->bindata.end(), [&](auto& bdp) { return bdp.first == buf; });
+		KHUTILS_ASSERT_NOT(it, doc->bindata.end());
+
+		return it->second;
 	}
 
-	size_t addBindata(const std::vector<uint8_t>& data, Document* const doc, const char* name)
+	//---
+	// sets buffer data, overwriting existing
+	// returns new size
+	// returns 0 if: buffer does not exist
+
+	size_t setBufferData(const std::vector<uint8_t>& data, Document* const doc, BufferT* const buf)
 	{
-		doc->bindata[name].reserve(doc->bindata[name].size() + data.size());
-		std::copy(data.begin(), data.end(), std::back_inserter(doc->bindata[name]));
-		return doc->bindata[name].size();
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(data);
+		return setBufferData(data.data(), data.size(), doc, buf);
 	}
 
+	//---
+
+	size_t setBufferData(const uint8_t* data, size_t length, Document* const doc, BufferT* const buf)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(buf);
+
+		auto id = getId(doc, buf);
+		if (isValidBufferId(doc, id))
+		{
+			auto bufdata = getBufferData(doc, buf);
+			bufdata.clear();
+			bufdata.reserve(length);
+			std::copy_n(data, length, std::back_inserter(bufdata));
+			return getBufferData(doc, buf).size();
+		}
+
+		return 0;
+	}
+
+	//---
+	// appends buffer data to existing buffer data
+	// returns new size
+	// returns 0 if: buffer does not exist
+
+	size_t appendBufferData(const std::vector<uint8_t>& data, Document* const doc, BufferT* const buf)
+	{
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(data);
+		return appendBufferData(data.data(), data.size(), doc, buf);
+	}
+
+	//---
+
+	size_t appendBufferData(const uint8_t* data, size_t length, Document* const doc, BufferT* const buf)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(buf);
+
+		auto id = getId(doc, buf);
+		if (isValidBufferId(doc, id))
+		{
+			auto bufdata = getBufferData(doc, buf);
+			bufdata.reserve(bufdata.size() + length);
+			std::copy_n(data, length, std::back_inserter(bufdata));
+			return getBufferData(doc, buf).size();
+		}
+
+		return 0;
+	}
+
+	//---
 
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
