@@ -8,8 +8,15 @@
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
 
+#define KHUTILS_FILE_IMPL
 #define KHUTILS_LOGGING_IMPL
+#define KHUTILS_ASSERTION_INLINE
+#define KHUTILS_ASSERTION_IMPL
+#define KHUTILS_RUNTIME_EXCEPTIONS_IMPL
+#include "khutils/assertion.hpp"
+#include "khutils/file.hpp"
 #include "khutils/logging.hpp"
+#include "khutils/runtime_exceptions.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -55,10 +62,14 @@ int main(int argc, char** argv)
 	std::cout << gltfFileContents << std::endl;
 	{
 		auto doc = std::unique_ptr<Document, decltype(&destroyDocument)>(createDocument("test"), &destroyDocument);
-
 		std::cout << "----------------------" << std::endl;
 		auto iss	= std::istringstream(gltfFileContents);
-		bool loadOk = loadDocument_json(doc.get(), iss);
+		bool loadOk = loadDocument_json(doc.get(),
+										"",	//
+										[&](const char*, std::vector<uint8_t>& data) {
+											data= khutils::openBufferFromStream(iss);
+											return true;
+										});
 		if (!loadOk)
 		{
 			std::cerr << "loading failed" << std::endl;
@@ -66,7 +77,12 @@ int main(int argc, char** argv)
 
 		std::cout << "----------------------" << std::endl;
 		auto oss	= std::ostringstream();
-		bool saveOk = saveDocument_json(doc.get(), oss);
+		bool saveOk = saveDocument_json(doc.get(),
+										"",	//
+										[&](const char*, const std::vector<uint8_t>& data) {
+											khutils::dumpBufferToStream(data, oss);
+											return true;
+										});
 		std::cout << oss.str() << std::endl;
 		if (!saveOk)
 		{

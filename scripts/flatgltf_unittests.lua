@@ -17,6 +17,8 @@ project "flatgltf_2_0_loader"
 		glm_includedirs,
 		khutils_includedirs,
 		bandit_includedirs,
+		boost_includedirs,
+		glew_includedirs,
 	}
 
 	defines {
@@ -29,6 +31,8 @@ project "flatgltf_2_0_loader"
 	links {
 		"flatgltf_2_0",
 		"flatbuffers",
+		"boost.filesystem",
+		"boost.system",
 	}
 
 build_cppfwd("flatgltf_2_0_loader")
