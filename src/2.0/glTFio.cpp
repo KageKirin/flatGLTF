@@ -389,7 +389,6 @@ namespace glTF_2_0
 			return saveDocument_json_plus(doc, uri);
 		}
 
-
 		return false;
 	}
 
