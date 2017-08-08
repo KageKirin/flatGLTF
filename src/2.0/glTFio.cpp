@@ -668,6 +668,68 @@ namespace glTF_2_0
 
 	//---
 
+	// load document from glTF-binary: all buffers merged into 1, without external data
+	bool loadDocument_glb(Document* const doc, const char* location, data_reader_t reader)
+	{
+		return false;
+	}
+
+	// load document from glTF-binary: all buffers merged into 1, with external data
+	bool loadDocument_glb_plus(Document* const doc, const char* location, data_reader_t reader)
+	{
+		bool loadOk = loadDocument_glb(doc, location, reader);
+		if (loadOk)
+		{
+			for (auto& buf : doc->root->buffers)
+			{
+				if (isDataUri(buf->uri))
+				{
+					setBufferData(convertUriToData(buf->uri), doc, buf.get());
+				}
+				else
+				{
+					std::vector<uint8_t> bufData;
+					auto				 readOk = reader(buf->uri.c_str(), bufData);
+					if (readOk)
+					{
+						setBufferData(bufData, doc, buf.get());
+					}
+					else
+						return false;
+				}
+			}
+
+			for (auto& img : doc->root->images)
+			{
+				if (isValidBufferViewId(doc, img->bufferView))
+				{
+					continue;
+				}
+
+				if (isDataUri(img->uri))
+				{
+					setImageData(convertUriToData(img->uri), doc, img.get());
+				}
+				else
+				{
+					std::vector<uint8_t> bufData;
+					auto				 readOk = reader(img->uri.c_str(), bufData);
+					if (readOk)
+					{
+						setImageData(bufData, doc, img.get());
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		return false;
+	}
+
 	//-------------------------------------------------------------------------
 
 }	// namespace glTF_2_0
