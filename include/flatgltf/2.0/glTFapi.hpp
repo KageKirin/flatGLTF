@@ -27,9 +27,8 @@ namespace glTF_2_0
 	struct Document;
 
 
-	Document* const		  createDocument(const char* name);
-	void				  destroyDocument(Document* const);
-	std::vector<uint8_t>& createBindata(Document* const, const char* name);
+	Document* const createDocument(const char* name);
+	void			destroyDocument(Document* const);
 
 	// returns buffer data if buffer exists
 	std::vector<uint8_t>& getBufferData(Document* const, BufferT* const);
@@ -60,6 +59,7 @@ namespace glTF_2_0
 	///-----------------------------------------------------------------------
 	// all functions return a const-pointer to mutable-object
 	// nullptr if error
+	// else, returned object is only set to internal default values
 
 	AccessorT* const   createAccessor(Document* const, const char* name = nullptr);
 	AnimationT* const  createAnimation(Document* const, const char* name = nullptr);
@@ -84,7 +84,9 @@ namespace glTF_2_0
 	// nullptr if error
 
 	//! create buffer
-	// if uri is null, data will be internal/base64 embedded
+	// if uri is a data uri (beginning see below), buffer will be created for embedded base64 storage
+	// else, uri is used as _base_ to create a unique buffer data buffer
+	constexpr char dataUri[] = "data:";
 	BufferT* const createBuffer(Document* const, const char* uri, const char* name);
 
 	//! create buffer view
