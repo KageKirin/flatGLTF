@@ -55,6 +55,14 @@ namespace glTF_2_0
 
 	//---
 
+	size_t setBufferViewData(const std::vector<uint8_t>& data, Document* const doc, BufferViewT* const view)
+	{
+		KHUTILS_ASSERT_CNTR_NOT_EMPTY(data);
+		return setBufferViewData(data.data(), data.size(), doc, view);
+	}
+
+	//---
+
 	size_t setBufferViewData(const uint8_t* const data, size_t length, Document* const doc, BufferViewT* const view)
 	{
 		KHUTILS_ASSERT_PTR(data);
@@ -66,12 +74,30 @@ namespace glTF_2_0
 		KHUTILS_ASSERT_PTR(buf);
 
 		view->byteOffset = buf->byteLength;
-		addBufferData(data, length, doc, buf);
+		appendBufferData(data, length, doc, buf);
 
 		view->byteLength = length;
 		view->byteStride = 0;
-		view->target	 = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return view->byteLength;
+	}
+
+	//---
+
+	std::vector<uint8_t> getBufferViewData(const Document* const doc, const BufferViewT* const view)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(view);
+
+		auto buf = getBuffer(doc, view->buffer);
+		KHUTILS_ASSERT_PTR(buf);
+
+		auto bufdata = getBufferData(doc, buf);
+
+		std::vector<uint8_t> viewdata;
+		viewdata.reserve(view->byteLength);
+		std::copy_n(bufdata.begin() + view->byteOffset, view->byteLength, std::back_inserter(viewdata));
+		return viewdata;
 	}
 
 	//-------------------------------------------------------------------------

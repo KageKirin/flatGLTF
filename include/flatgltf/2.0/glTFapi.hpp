@@ -52,6 +52,8 @@ namespace glTF_2_0
 	size_t setBufferViewData(const std::vector<uint8_t>&, Document* const, BufferViewT* const);
 	size_t setBufferViewData(const uint8_t* const, size_t length, Document* const, BufferViewT* const);
 
+	// returns COPY of data pointed to by bufferView
+	std::vector<uint8_t> getBufferViewData(const Document* const, const BufferViewT* const);
 
 	///-----------------------------------------------------------------------
 	/// instantiation
