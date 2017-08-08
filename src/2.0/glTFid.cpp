@@ -165,27 +165,6 @@ namespace glTF_2_0
 
 	//---
 
-	// glTFid_t getId(const Document* const doc, const MeshPrimitiveT* const elem)
-	// {
-	// 	if (!elem)
-	// 	{
-	// 		return -2;
-	// 	}
-	// 	if (doc && doc->root)
-	// 	{
-	// 		auto it = std::find_if(doc->root->meshprimitives.begin(), doc->root->meshprimitives.end(), [&elem](auto&
-	// inst) { 			return inst.get() == elem;
-	// 		});
-	// 		if (it != doc->root->meshprimitives.end())
-	// 		{
-	// 			return glTFid_t(std::distance(doc->root->meshprimitives.begin(), it));
-	// 		}
-	// 	}
-	// 	return -1;
-	// }
-
-	//---
-
 	glTFid_t getId(const Document* const doc, const MeshT* const elem)
 	{
 		if (!elem)

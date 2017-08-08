@@ -268,7 +268,6 @@ namespace glTF_2_0
 	glTFid_t getId(const Document* const, const CameraT* const);
 	glTFid_t getId(const Document* const, const ImageT* const);
 	glTFid_t getId(const Document* const, const MaterialT* const);
-	glTFid_t getId(const Document* const, const MeshPrimitiveT* const);
 	glTFid_t getId(const Document* const, const MeshT* const);
 	glTFid_t getId(const Document* const, const NodeT* const);
 	glTFid_t getId(const Document* const, const SceneT* const);
