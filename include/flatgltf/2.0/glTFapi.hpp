@@ -166,10 +166,21 @@ namespace glTF_2_0
 	ImageT* const createImage(const std::vector<uint8_t>& data, Document* const, const char* uri, const char* name = nullptr);
 	ImageT* const createImage(const uint8_t* const, size_t length, Document* const, const char* uri, const char* name = nullptr);
 
-	//! create an image referring to a base64 uri created from provided data
-	ImageT* const createImage_embedded(const std::vector<uint8_t>& data, Document* const, const char* mimeType, const char* name = nullptr);
-	ImageT* const createImage_embedded(const uint8_t* const, size_t length, Document* const, const char* mimeType, const char* name = nullptr);
+	// returns image data if image exists
+	std::vector<uint8_t>& getImageData(Document* const, ImageT* const);
+	std::vector<uint8_t>  getImageData(const Document* const, const ImageT* const);
 
+	// sets image data, overwriting existing
+	// returns new size
+	// returns 0 if: buffer does not exist
+	size_t setImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
+	size_t setImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
+
+	// appends image data to existing image data
+	// returns new size
+	// returns 0 if: image does not exis
+	size_t appendImageData(const std::vector<uint8_t>&, Document* const, ImageT* const);
+	size_t appendImageData(const uint8_t* const, size_t length, Document* const, ImageT* const);
 
 	//! create meshprimitive
 	// create meshprimitives and add them to given mesh
