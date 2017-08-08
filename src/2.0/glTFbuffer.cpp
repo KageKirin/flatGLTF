@@ -25,7 +25,7 @@ namespace glTF_2_0
 			instance->name = name;
 		}
 		doc->root->buffers.push_back(std::move(instance));
-		createBufferData(doc, instance.get()).clear();
+		createBufferData(doc, doc->root->buffers.back().get()).clear();
 		return doc->root->buffers.back().get();
 	}
 

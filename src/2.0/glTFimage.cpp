@@ -56,7 +56,7 @@ namespace glTF_2_0
 			instance->name = name;
 		}
 		doc->root->images.push_back(std::move(instance));
-		createImageData(doc, instance.get()).clear();
+		createImageData(doc, doc->root->images.back().get()).clear();
 		return doc->root->images.back().get();
 	}
 
