@@ -90,6 +90,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -110,6 +111,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -130,6 +132,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ELEMENT_ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -150,6 +153,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ELEMENT_ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -191,6 +195,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -211,6 +216,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -252,6 +258,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -272,6 +279,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -313,6 +321,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -333,6 +342,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -374,6 +384,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -394,6 +405,7 @@ namespace glTF_2_0
 		auto bufferView = getBufferView(doc, accessor->bufferView);
 		KHUTILS_ASSERT_PTR(bufferView);
 		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -411,9 +423,10 @@ namespace glTF_2_0
 		accessor->count			= data.size();
 		accessor->type			= AccessorType::MAT4;
 
-		auto bufferView = getBufferView(doc, accessor->bufferView);
-		KHUTILS_ASSERT_PTR(bufferView);
-		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+		// auto bufferView = getBufferView(doc, accessor->bufferView);
+		// KHUTILS_ASSERT_PTR(bufferView);
+		// bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -431,9 +444,10 @@ namespace glTF_2_0
 		accessor->count			= data.size();
 		accessor->type			= AccessorType::MAT3;
 
-		auto bufferView = getBufferView(doc, accessor->bufferView);
-		KHUTILS_ASSERT_PTR(bufferView);
-		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+		// auto bufferView = getBufferView(doc, accessor->bufferView);
+		// KHUTILS_ASSERT_PTR(bufferView);
+		// bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
@@ -451,9 +465,10 @@ namespace glTF_2_0
 		accessor->count			= data.size();
 		accessor->type			= AccessorType::MAT2;
 
-		auto bufferView = getBufferView(doc, accessor->bufferView);
-		KHUTILS_ASSERT_PTR(bufferView);
-		bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+		// auto bufferView = getBufferView(doc, accessor->bufferView);
+		// KHUTILS_ASSERT_PTR(bufferView);
+		// bufferView->target = static_cast<int32_t>(BufferViewTarget::ARRAY_BUFFER);
+
 		return accessor;
 	}
 
