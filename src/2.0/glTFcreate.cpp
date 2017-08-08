@@ -39,19 +39,6 @@ namespace glTF_2_0
 
 	//---
 
-	ImageT* const createImage(Document* const doc, const char* name)
-	{
-		auto instance = Image_t{new ImageT};
-		if (name)
-		{
-			instance->name = name;
-		}
-		doc->root->images.push_back(std::move(instance));
-		return doc->root->images.back().get();
-	}
-
-	//---
-
 	MaterialT* const createMaterial(Document* const doc, const char* name)
 	{
 		auto instance = Material_t{new MaterialT};
