@@ -31,15 +31,10 @@ namespace glTF_2_0
 	{
 		KHUTILS_ASSERT_PTR(buf);
 
-		auto view = createBufferView(doc);
+		auto view = createBufferView(doc, name);
 		KHUTILS_ASSERT_PTR(view);
 
 		view->buffer = getId(doc, buf);
-
-		if (name)
-		{
-			view->name = name;
-		}
 
 		setBufferViewData(data, length, doc, view);
 
