@@ -30,6 +30,7 @@ extern const std::string flatgltf_2_0_schema;
 namespace glTF_2_0
 {
 	using namespace glTF_common;
+	namespace fs = boost::filesystem;
 
 	///------------------------------------------------------------------------
 	/// load document as-is, without modification or external data
@@ -97,41 +98,45 @@ namespace glTF_2_0
 	{
 		KHUTILS_ASSERT_PTR(doc);
 
-		bool allBuffersLoadOk = std::all_of(doc->root->buffers.begin(), doc->root->buffers.end(), [&](auto& buf) {
-			if (isDataUri(buf->uri))
-			{
-				setBufferData(convertUriToData(buf->uri), doc, buf.get());
-				return true;
-			}
+		bool allBuffersLoadOk = std::all_of(doc->root->buffers.begin(),
+											doc->root->buffers.end(),
+											[&, opath = fs::path(location).parent_path()](auto& buf) {
+												if (isDataUri(buf->uri))
+												{
+													setBufferData(convertUriToData(buf->uri), doc, buf.get());
+													return true;
+												}
 
-			std::vector<uint8_t>bufData;
-			if (reader(buf->uri.c_str(), bufData))
-			{
-				setBufferData(bufData, doc, buf.get());
-				return true;
-			}
-			return false;
-		});
+												std::vector<uint8_t>bufData;
+												if (reader((opath / buf->uri).c_str(), bufData))
+												{
+													setBufferData(bufData, doc, buf.get());
+													return true;
+												}
+												return false;
+											});
 
 
-		bool allImagesLoadOk = std::all_of(doc->root->images.begin(), doc->root->images.end(), [&](auto& img) {
-			if (isValidBufferViewId(doc, img->bufferView))
-				return true;
+		bool allImagesLoadOk = std::all_of(doc->root->images.begin(),
+										   doc->root->images.end(),
+										   [&, opath = fs::path(location).parent_path()](auto& img) {
+											   if (isValidBufferViewId(doc, img->bufferView))
+												   return true;
 
-			if (isDataUri(img->uri))
-			{
-				setImageData(convertUriToData(img->uri), doc, img.get());
-				return true;
-			}
+											   if (isDataUri(img->uri))
+											   {
+												   setImageData(convertUriToData(img->uri), doc, img.get());
+												   return true;
+											   }
 
-			std::vector<uint8_t>bufData;
-			if (reader(img->uri.c_str(), bufData))
-			{
-				setImageData(bufData, doc, img.get());
-				return true;
-			}
-			return false;
-		});
+											   std::vector<uint8_t>bufData;
+											   if (reader((opath / img->uri).c_str(), bufData))
+											   {
+												   setImageData(bufData, doc, img.get());
+												   return true;
+											   }
+											   return false;
+										   });
 
 		return allBuffersLoadOk && allImagesLoadOk;
 	}
@@ -209,12 +214,14 @@ namespace glTF_2_0
 	{
 		KHUTILS_ASSERT_PTR(doc);
 
-		return std::all_of(doc->root->buffers.begin(), doc->root->buffers.end(), [&](auto& buf) {
-			if (isDataUri(buf->uri))
-				return true;
+		return std::all_of(doc->root->buffers.begin(),
+						   doc->root->buffers.end(),
+						   [&, opath = fs::path(location).parent_path()](auto& buf) {
+							   if (isDataUri(buf->uri))
+								   return true;
 
-			return writer(buf->uri.c_str(), getBufferData(doc, buf.get()));
-		});
+							   return writer((opath / buf->uri).c_str(), getBufferData(doc, buf.get()));
+						   });
 	}
 
 	//---
@@ -223,15 +230,17 @@ namespace glTF_2_0
 	{
 		KHUTILS_ASSERT_PTR(doc);
 
-		return std::all_of(doc->root->images.begin(), doc->root->images.end(), [&](auto& img) {
-			if (isDataUri(img->uri))
-				return true;
+		return std::all_of(doc->root->images.begin(),
+						   doc->root->images.end(),
+						   [&, opath = fs::path(location).parent_path()](auto& img) {
+							   if (isDataUri(img->uri))
+								   return true;
 
-			if (isValidBufferViewId(doc, img->bufferView))
-				return true;
+							   if (isValidBufferViewId(doc, img->bufferView))
+								   return true;
 
-			return writer(img->uri.c_str(), getImageData(doc, img.get()));
-		});
+							   return writer((opath / img->uri).c_str(), getImageData(doc, img.get()));
+						   });
 	}
 
 	//---
@@ -341,8 +350,6 @@ namespace glTF_2_0
 	///------------------------------------------------------------------------
 	/// ease-of-use load/save functions, to file by default
 	///------------------------------------------------------------------------
-
-	namespace fs = boost::filesystem;
 
 	bool loadDocument(Document* const doc, const char* uri)
 	{
