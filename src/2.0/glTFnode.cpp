@@ -6,6 +6,8 @@
 #define KHUTILS_ASSERTION_INLINE
 
 #include "khutils/assertion.hpp"
+#include "khutils/glm/glm_isnan.hpp"
+#include "khutils/isnan.hpp"
 #include "khutils/runtime_exceptions.hpp"
 
 namespace glTF_2_0
@@ -63,6 +65,7 @@ namespace glTF_2_0
 
 	void setNodeMatrix(NodeT* const node, const mat4_t& m)
 	{
+		khutils::check_NaN(m);
 		if (node)
 		{
 			auto msize = m.length() * mat4_t::col_type::length();
@@ -80,6 +83,7 @@ namespace glTF_2_0
 
 	void setNodeRotation(NodeT* const node, const quat_t& q)
 	{
+		khutils::check_NaN(q);
 		if (node)
 		{
 			node->rotation.resize(q.length());
@@ -94,6 +98,7 @@ namespace glTF_2_0
 
 	void setNodeScale(NodeT* const node, const vec3_t& v)
 	{
+		khutils::check_NaN(v);
 		if (node)
 		{
 			node->scale.resize(v.length());
@@ -108,6 +113,7 @@ namespace glTF_2_0
 
 	void setNodeTranslation(NodeT* const node, const vec3_t& v)
 	{
+		khutils::check_NaN(v);
 		if (node)
 		{
 			node->translation.resize(v.length());
