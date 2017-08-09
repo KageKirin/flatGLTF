@@ -197,9 +197,17 @@ namespace glTF_2_0
 		}
 
 		auto root = cloneRoot(doc->root);
-		root->buffers.resize(1);
-		root->buffers[0]->uri		 = "";
-		root->buffers[0]->byteLength = buffer.size();
+		
+		if(root->buffers.size() > 1)
+		{
+			root->buffers.resize(1);
+		}
+		
+		if(root->buffers.size() >= 1)
+		{
+			root->buffers[0]->uri		 = "bindata";
+			root->buffers[0]->byteLength = buffer.size();
+		}
 
 		return std::tuple<Root_t, std::vector<uint8_t>>{std::move(root), std::move(buffer)};
 	}
