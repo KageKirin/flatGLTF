@@ -53,6 +53,18 @@ namespace glTF_2_0
 
 	//---
 
+	BufferT* const getOrCreateBuffer(Document* const doc, const char* uri, const char* name)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		auto elem = getBuffer(doc, name);
+		if (!elem)
+		{
+			elem = createBuffer(doc, uri, name);
+		}
+		return elem;
+	}
+
 	///-----------------------------------------------------------------------
 	/// bindata
 	///-----------------------------------------------------------------------

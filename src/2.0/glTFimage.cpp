@@ -84,6 +84,20 @@ namespace glTF_2_0
 	}
 
 	//---
+
+	ImageT* const getOrCreateImage(Document* const doc, const char* uri, const char* name)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+
+		auto elem = getImage(doc, name);
+		if (!elem)
+		{
+			elem = createImage(doc, uri, name);
+		}
+		return elem;
+	}
+
+	//---
 	//! create an image referring to a buffer view for data
 	ImageT* const createImage(Document* const doc, BufferViewT* const view, const char* mimeType, const char* name)
 	{
@@ -125,6 +139,8 @@ namespace glTF_2_0
 
 		return img;
 	}
+
+	//---
 
 	///-----------------------------------------------------------------------
 	/// imgdata

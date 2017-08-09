@@ -292,6 +292,9 @@ namespace glTF_2_0
 	TextureT* const	getOrCreateTexture(Document* const, const char* name);
 	SkinT* const	   getOrCreateSkin(Document* const, const char* name);
 
+	BufferT* const getOrCreateBuffer(Document* const, const char* uri, const char* name);
+	ImageT* const  getOrCreateImage(Document* const, const char* uri, const char* name);
+
 	///-----------------------------------------------------------------------
 	/// get-id
 	///-----------------------------------------------------------------------
