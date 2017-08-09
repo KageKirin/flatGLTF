@@ -100,15 +100,16 @@ namespace glTF_2_0
 
 		for (auto& idp : doc->imgdata)
 		{
-			KHUTILS_ASSERT_PTR(idp.first);
-			KHUTILS_ASSERT(isValidImageId(doc.get(), getId(doc.get(), idp.first)));
+			KHUTILS_ASSERT(isValidImageId(doc.get(), idp.first));
+			auto img = getImage(doc.get(), idp.first);
+			KHUTILS_ASSERT_PTR(img);
 
 			if (isImageDataPNG(idp.second))
-				idp.first->uri = convertDataToUri(idp.second, "image/png");
+				img->uri = convertDataToUri(idp.second, "image/png");
 			else if (isImageDataJPEG(idp.second))
-				idp.first->uri = convertDataToUri(idp.second, "image/jpeg");
+				img->uri = convertDataToUri(idp.second, "image/jpeg");
 			else	// actually not in spec
-				idp.first->uri = convertDataToUri(idp.second, "application/octet-stream");
+				img->uri = convertDataToUri(idp.second, "application/octet-stream");
 		}
 
 		return std::move(doc->root);
@@ -126,23 +127,25 @@ namespace glTF_2_0
 
 		for (auto& bdp : doc->bindata)
 		{
-			KHUTILS_ASSERT_PTR(bdp.first);
-			KHUTILS_ASSERT(isValidBufferId(doc.get(), getId(doc.get(), bdp.first)));
+			KHUTILS_ASSERT(isValidBufferId(doc.get(), bdp.first));
+			auto buf = getBuffer(doc.get(), bdp.first);
+			KHUTILS_ASSERT_PTR(buf);
 
-			bdp.first->uri = convertDataToUri(bdp.second, "application/octet-stream");
+			buf->uri = convertDataToUri(bdp.second, "application/octet-stream");
 		}
 
 		for (auto& idp : doc->imgdata)
 		{
-			KHUTILS_ASSERT_PTR(idp.first);
-			KHUTILS_ASSERT(isValidImageId(doc.get(), getId(doc.get(), idp.first)));
+			KHUTILS_ASSERT(isValidImageId(doc.get(), idp.first));
+			auto img = getImage(doc.get(), idp.first);
+			KHUTILS_ASSERT_PTR(img);
 
 			if (isImageDataPNG(idp.second))
-				idp.first->uri = convertDataToUri(idp.second, "image/png");
+				img->uri = convertDataToUri(idp.second, "image/png");
 			else if (isImageDataJPEG(idp.second))
-				idp.first->uri = convertDataToUri(idp.second, "image/jpeg");
+				img->uri = convertDataToUri(idp.second, "image/jpeg");
 			else	// actually not in spec
-				idp.first->uri = convertDataToUri(idp.second, "application/octet-stream");
+				img->uri = convertDataToUri(idp.second, "application/octet-stream");
 		}
 
 		return std::move(doc->root);
@@ -218,15 +221,16 @@ namespace glTF_2_0
 		{
 			for (auto& idp : doc->imgdata)
 			{
-				KHUTILS_ASSERT_PTR(idp.first);
-				KHUTILS_ASSERT(isValidImageId(doc.get(), getId(doc.get(), idp.first)));
+				KHUTILS_ASSERT(isValidImageId(doc.get(), idp.first));
+				auto img = getImage(doc.get(), idp.first);
+				KHUTILS_ASSERT_PTR(img);
 
 				if (isImageDataPNG(idp.second))
-					idp.first->uri = convertDataToUri(idp.second, "image/png");
+					img->uri = convertDataToUri(idp.second, "image/png");
 				else if (isImageDataJPEG(idp.second))
-					idp.first->uri = convertDataToUri(idp.second, "image/jpeg");
+					img->uri = convertDataToUri(idp.second, "image/jpeg");
 				else	// actually not in spec
-					idp.first->uri = convertDataToUri(idp.second, "application/octet-stream");
+					img->uri = convertDataToUri(idp.second, "application/octet-stream");
 			}
 		}
 
@@ -266,7 +270,7 @@ namespace glTF_2_0
 
 		doc->root.swap(root);
 		doc->bindata.clear();
-		doc->bindata[getBuffer(doc, 0)].assign(bindata.begin(), bindata.end());
+		doc->bindata[0].assign(bindata.begin(), bindata.end());
 
 		return true;
 	}
@@ -302,25 +306,31 @@ namespace glTF_2_0
 
 		for (auto& bdp : doc->bindata)
 		{
-			if (isDataUri(bdp.first->uri))
+			KHUTILS_ASSERT(isValidBufferId(doc, bdp.first));
+			auto buf = getBuffer(doc, bdp.first);
+			KHUTILS_ASSERT_PTR(buf);
+			if (isDataUri(buf->uri))
 			{
-				bdp.first->uri = std::string("bindata") + std::to_string(bindataCounter++) + ".bin";
+				buf->uri = std::string("bindata") + std::to_string(bindataCounter++) + ".bin";
 			}
 		}
 
 		size_t imgdataCounter = 0;
 		for (auto& idp : doc->imgdata)
 		{
-			if (isDataUri(idp.first->uri))
+			KHUTILS_ASSERT(isValidImageId(doc, idp.first));
+			auto img = getImage(doc, idp.first);
+			KHUTILS_ASSERT_PTR(img);
+			if (isDataUri(img->uri))
 			{
-				idp.first->uri = std::string("imgdata") + std::to_string(imgdataCounter++);
+				img->uri = std::string("imgdata") + std::to_string(imgdataCounter++);
 
 				if (isImageDataPNG(idp.second))
-					idp.first->uri += ".png";
+					img->uri += ".png";
 				else if (isImageDataJPEG(idp.second))
-					idp.first->uri += ".jpeg";
+					img->uri += ".jpeg";
 				else	// actually not in spec
-					idp.first->uri += ".bin";
+					img->uri += ".bin";
 			}
 		}
 

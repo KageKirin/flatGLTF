@@ -56,7 +56,10 @@ namespace glTF_2_0
 			instance->name = name;
 		}
 		doc->root->images.push_back(std::move(instance));
-		createImageData(doc, doc->root->images.back().get()).clear();
+
+		auto createOk = createImageData(doc, doc->root->images.back().get());
+		KHUTILS_ASSERT(createOk);
+
 		return doc->root->images.back().get();
 	}
 
@@ -127,13 +130,33 @@ namespace glTF_2_0
 	/// imgdata
 	///-----------------------------------------------------------------------
 
-	std::vector<uint8_t>& createImageData(Document* const doc, ImageT* const img)
+	bool createImageData(Document* const doc, ImageT* const img)
 	{
 		KHUTILS_ASSERT_PTR(doc);
 		KHUTILS_ASSERT_PTR(img);
 
-		doc->imgdata[img].clear();
-		return doc->imgdata[img];
+		return createImageData(doc, getId(doc, img));
+	}
+
+	//---
+
+	bool createImageData(Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT(isValidImageId(doc, id));
+
+		if (std::find_if(doc->imgdata.begin(),
+						 doc->imgdata.end(),
+						 [&id](auto& bdp) {	//
+							 return bdp.first == id;
+						 })
+			!= doc->imgdata.end())
+		{
+			return false;	// data already exist
+		}
+
+		doc->imgdata[id].clear();
+		return true;
 	}
 
 	//---
@@ -151,7 +174,9 @@ namespace glTF_2_0
 			return getBufferViewData(doc, getBufferView(doc, img->bufferView));
 		}
 
-		auto it = std::find_if(doc->imgdata.begin(), doc->imgdata.end(), [&](auto& bdp) { return bdp.first == img; });
+		auto it = std::find_if(doc->imgdata.begin(), doc->imgdata.end(), [&](auto& bdp) {	//
+			return bdp.first == id;
+		});
 		KHUTILS_ASSERT_NOT(it, doc->imgdata.end());
 
 		return it->second;
@@ -183,7 +208,7 @@ namespace glTF_2_0
 				return setBufferViewData(data, length, doc, getBufferView(doc, img->bufferView));
 			}
 
-			auto& imgdata = doc->imgdata[img];
+			auto& imgdata = doc->imgdata[id];
 			imgdata.reserve(length);
 			imgdata.assign(data, data + length);
 			return imgdata.size();

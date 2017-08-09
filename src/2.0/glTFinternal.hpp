@@ -48,22 +48,24 @@ namespace glTF_2_0
 		/// json root element for glTF data
 		Root_t root;
 
-		/// binary data mapping buffer -> data referenced by buffer elements
-		std::map<BufferT* const, std::vector<uint8_t>> bindata;
+		/// binary data mapping bufferID -> data referenced by buffer elements
+		std::map<glTFid_t, std::vector<uint8_t>> bindata;
 
-		/// binary data mapping image -> image data referenced by image elements
+		/// binary data mapping imageID -> image data referenced by image elements
 		/// NOTE: images can rerefence bufferViews, and thus buffer,
 		/// in which case the image data will be stored in the referenced buffer
-		std::map<ImageT* const, std::vector<uint8_t>> imgdata;
+		std::map<glTFid_t, std::vector<uint8_t>> imgdata;
 	};
 
 	std::unique_ptr<Document, decltype(&destroyDocument)> createDocumentPtr(const std::string& name);
 
 	// creates new bindata
-	std::vector<uint8_t>& createBufferData(Document* const, BufferT* const);
+	bool createBufferData(Document* const, BufferT* const);
+	bool createBufferData(Document* const, glTFid_t);
 
 	// creates new imgdata
-	std::vector<uint8_t>& createImageData(Document* const, ImageT* const);
+	bool createImageData(Document* const, ImageT* const);
+	bool createImageData(Document* const, glTFid_t);
 
 	///-----------------------------------------------------------------------
 

@@ -25,7 +25,10 @@ namespace glTF_2_0
 			instance->name = name;
 		}
 		doc->root->buffers.push_back(std::move(instance));
-		createBufferData(doc, doc->root->buffers.back().get()).clear();
+
+		auto createOk = createBufferData(doc, doc->root->buffers.back().get());
+		KHUTILS_ASSERT(createOk);
+
 		return doc->root->buffers.back().get();
 	}
 
@@ -54,13 +57,33 @@ namespace glTF_2_0
 	/// bindata
 	///-----------------------------------------------------------------------
 
-	std::vector<uint8_t>& createBufferData(Document* const doc, BufferT* const buf)
+	bool createBufferData(Document* const doc, BufferT* const buf)
 	{
 		KHUTILS_ASSERT_PTR(doc);
 		KHUTILS_ASSERT_PTR(buf);
 
-		doc->bindata[buf].clear();
-		return doc->bindata[buf];
+		return createBufferData(doc, getId(doc, buf));
+	}
+
+	//---
+
+	bool createBufferData(Document* const doc, glTFid_t id)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT(isValidBufferId(doc, id));
+
+		if (std::find_if(doc->bindata.begin(),
+						 doc->bindata.end(),
+						 [&id](auto& bdp) {	//
+							 return bdp.first == id;
+						 })
+			!= doc->bindata.end())
+		{
+			return false;	// data already exist
+		}
+
+		doc->bindata[id].clear();
+		return true;
 	}
 
 	//---
@@ -73,7 +96,9 @@ namespace glTF_2_0
 		auto id = getId(doc, buf);
 		KHUTILS_ASSERT(isValidBufferId(doc, id));
 
-		auto it = std::find_if(doc->bindata.begin(), doc->bindata.end(), [&](auto& bdp) { return bdp.first == buf; });
+		auto it = std::find_if(doc->bindata.begin(), doc->bindata.end(), [&](auto& bdp) {	//
+			return bdp.first == id;
+		});
 		KHUTILS_ASSERT_NOT(it, doc->bindata.end());
 
 		return it->second;
@@ -100,7 +125,7 @@ namespace glTF_2_0
 		auto id = getId(doc, buf);
 		if (isValidBufferId(doc, id))
 		{
-			auto& bufdata = doc->bindata[buf];
+			auto& bufdata = doc->bindata[id];
 			bufdata.reserve(length);
 			bufdata.assign(data, data + length);
 
@@ -132,7 +157,7 @@ namespace glTF_2_0
 		auto id = getId(doc, buf);
 		if (isValidBufferId(doc, id))
 		{
-			auto& bufdata = doc->bindata[buf];
+			auto& bufdata = doc->bindata[id];
 			bufdata.reserve(bufdata.size() + length);
 			std::copy_n(data, length, std::back_inserter(bufdata));
 
