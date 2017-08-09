@@ -197,10 +197,7 @@ namespace glTF_2_0
 		}
 
 		auto root = cloneRoot(doc->root);
-		if (root->buffers.size() > 1)
-		{
-			std::remove_if(root->buffers.begin() + 1, root->buffers.end(), [](auto&) { return true; });
-		}
+		root->buffers.resize(1);
 		root->buffers[0]->uri		 = "";
 		root->buffers[0]->byteLength = buffer.size();
 
