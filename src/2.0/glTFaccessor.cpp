@@ -30,8 +30,8 @@ namespace glTF_2_0
 	// data will be appended to buffer
 	AccessorT* const createAccessor(const uint8_t* const data, size_t length, Document* const doc, BufferT* const buf, const char* name)
 	{
-		auto view	 = createBufferView(data, length, doc, buf);
-		auto accessor = createAccessor(doc);
+		auto view	 = createBufferView(data, length, doc, buf, name);
+		auto accessor = createAccessor(doc, name);
 		KHUTILS_ASSERT_PTR(accessor);
 
 		accessor->bufferView	= getId(doc, view);
@@ -47,7 +47,7 @@ namespace glTF_2_0
 
 	AccessorT* const createAccessor(const std::vector<uint8_t>& data, Document* const doc, BufferT* const buf, const char* name)
 	{
-		auto accessor = createAccessor(data.data(), data.size(), doc, buf);
+		auto accessor = createAccessor(data.data(), data.size(), doc, buf, name);
 		KHUTILS_ASSERT_PTR(accessor);
 		return accessor;
 	}
@@ -59,7 +59,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(vec4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
@@ -80,7 +81,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(vec3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
@@ -101,7 +103,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(vec2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
@@ -122,7 +125,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(int32_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_INT);
 		accessor->normalized	= false;
@@ -143,7 +147,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(int32_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_INT);
 		accessor->normalized	= false;
@@ -164,7 +169,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i16vec4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::SHORT);
 		accessor->normalized	= false;
@@ -185,7 +191,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i16vec3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::SHORT);
 		accessor->normalized	= false;
@@ -206,7 +213,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i16vec2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::SHORT);
 		accessor->normalized	= false;
@@ -227,7 +235,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i8vec4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::BYTE);
 		accessor->normalized	= false;
@@ -248,7 +257,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i8vec3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::BYTE);
 		accessor->normalized	= false;
@@ -269,7 +279,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(i8vec2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::BYTE);
 		accessor->normalized	= false;
@@ -290,7 +301,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u16vec4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_SHORT);
 		accessor->normalized	= false;
@@ -311,7 +323,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u16vec3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_SHORT);
 		accessor->normalized	= false;
@@ -332,7 +345,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u16vec2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_SHORT);
 		accessor->normalized	= false;
@@ -353,7 +367,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u8vec4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_BYTE);
 		accessor->normalized	= false;
@@ -374,7 +389,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u8vec3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_BYTE);
 		accessor->normalized	= false;
@@ -395,7 +411,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(u8vec2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::UNSIGNED_BYTE);
 		accessor->normalized	= false;
@@ -416,7 +433,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(mat4_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
@@ -437,7 +455,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(mat3_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
@@ -458,7 +477,8 @@ namespace glTF_2_0
 		auto accessor = createAccessor(reinterpret_cast<const uint8_t* const>(data.data()),	//
 									   data.size() * sizeof(mat2_t),
 									   doc,
-									   buf);
+									   buf,
+									   name);
 		KHUTILS_ASSERT_PTR(accessor);
 		accessor->componentType = static_cast<int32_t>(ComponentType::FLOAT);
 		accessor->normalized	= false;
