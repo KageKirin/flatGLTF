@@ -29,6 +29,7 @@ namespace glTF_2_0
 
 	Document* const createDocument(const char* name);
 	void			destroyDocument(Document* const);
+	bool			verifyDocument(const Document* const);
 
 	///-----------------------------------------------------------------------
 	/// instantiation

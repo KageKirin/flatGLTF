@@ -36,12 +36,42 @@ namespace glTF_2_0
 	}
 
 	//---
-
 	// document creation
 
 	std::unique_ptr<Document, decltype(&destroyDocument)> createDocumentPtr(const std::string& name)
 	{
 		return std::unique_ptr<Document, decltype(&destroyDocument)>{createDocument(name.c_str()), &destroyDocument};
+	}
+
+	//---
+
+	bool verifyDocument(const Document* const doc)
+	{
+		KHUTILS_ASSERT_PTR(doc);
+		KHUTILS_ASSERT_PTR(doc->root);
+		auto& root = doc->root;
+
+		auto viewOk = std::all_of(root->bufferViews.begin(), root->bufferViews.end(), [&](auto& view) {
+			KHUTILS_ASSERT_PTR(view);
+			return isValidBufferId(doc, view->buffer);
+		});
+
+		auto accOk = std::all_of(root->accessors.begin(), root->accessors.end(), [&](auto& acc) {
+			KHUTILS_ASSERT_PTR(acc);
+			return isValidBufferViewId(doc, acc->bufferView);
+		});
+
+		std::vector<AccessorT*> accessors;
+		accessors.reserve(root->accessors.size());
+		std::transform(root->accessors.begin(), root->accessors.end(), std::back_inserter(accessors), [](auto& acc) {
+			return acc.get();
+		});
+
+		std::sort(accessors.begin(), accessors.end(), [](auto lhv, auto rhv) { return lhv->bufferView < rhv->bufferView; });
+		accessors.resize(std::distance(accessors.begin(), std::unique(accessors.begin(), accessors.end(), [](auto lhv, auto rhv) { return lhv->bufferView == rhv->bufferView; })));
+		auto uniqueBufferViews = accessors.size() == root->accessors.size();
+
+		return viewOk && accOk && uniqueBufferViews;
 	}
 
 	//-------------------------------------------------------------------------
