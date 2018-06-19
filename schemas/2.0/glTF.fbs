@@ -119,7 +119,7 @@ table Accessor
 
 	/// "description": "The number of attributes referenced by this accessor."
 	/// "gltf_detailedDescription": "The number of attributes referenced by this accessor, not to be confused with the number of bytes or number of components."
-	count: int = 1; //uint 
+	count: int = 0; //uint
 
 	/// "description": "Specifies if the attribute is a scalar, vector, or matrix."
 	type: AccessorType = __UNSET;
@@ -201,6 +201,7 @@ enum AnimationChannelTargetPath: short { //string
 	rotation,
 	scale,
 	weights,
+	__UNSET,
 }
 
 /// Animation Channel Target
@@ -210,7 +211,7 @@ table AnimationChannelTarget {
 	node: int = -1; //glTFid
 
 	/// "description": "The name of the node's TRS property to modify, or the \"weights\" of the Morph Targets it instantiates."
-	path: AnimationChannelTargetPath;
+	path: AnimationChannelTargetPath = __UNSET;
 
 	///-- glTFProperty
 	/// Dictionary object with extension-specific objects.
